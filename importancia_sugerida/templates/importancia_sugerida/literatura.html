@@ -1,0 +1,220 @@
+{% extends "evaluacion/dashboard_base.html" %}
+
+{% block title %}Importancia sugerida | GUIOS PRO{% endblock %}
+
+{% block content %}
+
+<!-- ENCABEZADO -->
+<div class="lit-head">
+
+    <div class="page-head">
+        <h1>Importancia sugerida</h1>
+        <p>
+            Se calcula con la literatura científica 2020–2025 (OpenAlex)
+            combinada con la importancia experta de cada factor.
+        </p>
+    </div>
+
+    <div class="lit-actions">
+
+        {% if act %}
+            <a href="{% url 'importancia_sugerida:exportar_excel_id' act.id %}" class="btn-cancelar">
+                <i class="bi bi-download"></i> Descargar Excel
+            </a>
+        {% endif %}
+
+        <form method="post" id="form-actualizar">
+            {% csrf_token %}
+            <button type="submit" class="btn-continuar" id="btn-actualizar">
+                Actualizar importancia sugerida
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+{% if act %}
+
+    <!-- RESUMEN DE LA ÚLTIMA ACTUALIZACIÓN -->
+    <div class="lit-stats">
+
+        <div class="lit-stat">
+            <span>Última actualización</span>
+            <strong>{{ act.fecha|date:"d M Y" }}</strong>
+            <small>{{ act.fecha|date:"H:i" }}</small>
+        </div>
+
+        <div class="lit-stat">
+            <span>Artículos encontrados</span>
+            <strong>{{ total_articulos }}</strong>
+            <small>en todas las consultas</small>
+        </div>
+
+        <div class="lit-stat">
+            <span>Subfactores consultados</span>
+            <strong>{{ n_subfactores }}</strong>
+            <small>una consulta por subfactor</small>
+        </div>
+
+        <div class="lit-stat">
+            <span>Fuente</span>
+            <strong>{{ act.fuente|default:"—" }}</strong>
+            <small>Cálculo {{ act.version_calculo|default:"—" }}</small>
+        </div>
+
+    </div>
+
+    <!-- RESULTADO POR FACTOR -->
+    <section class="panel-card">
+
+        <h2 class="panel-card-title">Resultado por factor</h2>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle eval-table">
+
+                <thead>
+                    <tr>
+                        <th>Factor</th>
+                        <th class="text-end">Artículos</th>
+                        <th class="text-end">Promedio R</th>
+                        <th>Imp. literaria</th>
+                        <th>Imp. experta</th>
+                        <th>Imp. sugerida</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for d in act.detalles.all %}
+
+                        <tr>
+                            <td class="fw-semibold">{{ d.factor.nombre|default:d.factor }}</td>
+                            <td class="text-end">{{ d.total_articulos }}</td>
+                            <td class="text-end">{{ d.promedio_r }}</td>
+                            <td><span class="level-chip" data-level="{{ d.importancia_literaria }}">{{ d.importancia_literaria }}</span></td>
+                            <td><span class="level-chip" data-level="{{ d.importancia_experta }}">{{ d.importancia_experta }}</span></td>
+                            <td><span class="level-chip level-strong" data-level="{{ d.importancia_sugerida }}">{{ d.importancia_sugerida }}</span></td>
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="6" class="text-center foda-empty py-4">
+                                Esta actualización no tiene factores calculados.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <!-- TRAZABILIDAD: CONSULTAS UTILIZADAS -->
+    <section class="panel-card">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div>
+                <h2 class="panel-card-title mb-1">Trazabilidad</h2>
+                <p class="panel-card-note mb-0">Cadena de búsqueda usada para cada subfactor.</p>
+            </div>
+
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#consultas"
+                aria-expanded="false"
+                aria-controls="consultas"
+            >
+                Ver consultas
+            </button>
+
+        </div>
+
+        <div class="collapse" id="consultas">
+
+            <div class="table-responsive mt-3">
+
+                <table class="table align-middle eval-table">
+
+                    <thead>
+                        <tr>
+                            <th>Subfactor</th>
+                            <th>Consulta</th>
+                            <th class="text-end">Artículos</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for c in act.consultas.all %}
+                            <tr>
+                                <td class="fw-semibold">{{ c.subfactor.nombre|default:c.subfactor }}</td>
+                                <td class="query-text">{{ c.consulta }}</td>
+                                <td class="text-end">{{ c.articulos_encontrados }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+{% else %}
+
+    <!-- AÚN NO HAY ACTUALIZACIONES -->
+    <div class="panel-empty-state">
+
+        <div class="panel-empty-icon">
+            <i class="bi bi-stars"></i>
+        </div>
+
+        <h2>Aún no hay una importancia sugerida</h2>
+
+        <p>
+            Pulsa “Actualizar importancia sugerida” para consultar la
+            literatura científica y calcular la importancia de cada factor.
+            El proceso puede tardar unos minutos.
+        </p>
+
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    const levels = ['Irrelevante', 'Opcional', 'Importante', 'Fundamental'];
+
+    document.querySelectorAll('.level-chip[data-level]').forEach(chip => {
+        const n = Number(chip.dataset.level);
+
+        if (n >= 1 && n <= 4) {
+            chip.textContent = n + ' · ' + levels[n - 1];
+        }
+    });
+
+    /* La actualización consulta la API una vez por subfactor: evita dobles clics */
+    document.getElementById('form-actualizar').addEventListener('submit', () => {
+        const btn = document.getElementById('btn-actualizar');
+
+        btn.disabled = true;
+        btn.textContent = 'Actualizando… esto puede tardar unos minutos';
+    });
+</script>
+{% endblock %}

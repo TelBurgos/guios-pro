@@ -1,0 +1,143 @@
+{% extends "evaluacion/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Historial | GUIOS PRO{% endblock %}
+
+{# CSS propio del historial (evaluacion/static/evaluacion/historial.css) #}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'evaluacion/historial.css' %}?v=1">
+{% endblock %}
+
+{% block content %}
+
+<!-- ENCABEZADO -->
+<div class="hist-head">
+    <div>
+        <span class="hist-kicker">TRAZABILIDAD</span>
+        <h1>Historial de evaluaciones</h1>
+        <p>Consulta, compara y exporta todos los resultados guardados.</p>
+    </div>
+
+    <!-- Botones de acciones generales -->
+    <div class="hist-head-actions">
+        <a href="{% url 'evaluacion:exportar_todo' %}" class="btn-cancelar">
+            Exportar todo
+        </a>
+        <a href="{% url 'evaluacion:nueva_evaluacion' %}" class="btn-continuar">
+            + Nueva evaluación
+        </a>
+    </div>
+</div>
+
+<!-- FILTROS -->
+<form method="get" class="hist-filters">
+
+    <!-- Buscador con lupa -->
+    <label class="hist-search">
+        <i class="bi bi-search"></i>
+        <input
+            type="search"
+            name="q"
+            value="{{ q }}"
+            placeholder="Buscar por software u organización..."
+        >
+    </label>
+
+    <!-- Filtro por resultado de la recomendación -->
+    <select name="resultado" onchange="this.form.submit()">
+        <option value="">Todos los resultados</option>
+        <option value="A" {% if resultado == 'A' %}selected{% endif %}>Adopción recomendada</option>
+        <option value="B" {% if resultado == 'B' %}selected{% endif %}>Adopción con reservas</option>
+        <option value="C" {% if resultado == 'C' %}selected{% endif %}>Adopción no recomendada</option>
+        <option value="pendiente" {% if resultado == 'pendiente' %}selected{% endif %}>Sin resultado</option>
+    </select>
+
+    <!-- Filtro por año -->
+    <select name="anio" onchange="this.form.submit()">
+        <option value="">Todos los años</option>
+        {% for a in anios %}
+            <option value="{{ a.year }}" {% if anio == a.year|stringformat:"d" %}selected{% endif %}>
+                {{ a.year }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <!-- Filtro por organización -->
+    <select name="org" onchange="this.form.submit()">
+        <option value="">Organización</option>
+        {% for o in organizaciones %}
+            <option value="{{ o.id }}" {% if org == o.id|stringformat:"d" %}selected{% endif %}>
+                {{ o.nombre }}
+            </option>
+        {% endfor %}
+    </select>
+
+</form>
+
+<!-- LÍNEA DE TIEMPO -->
+<div class="hist-list">
+
+    {% for e in evaluaciones %}
+
+        <div class="hist-row">
+
+            <!-- Fecha: día grande y mes/año pequeño -->
+            <div class="hist-date">
+                <strong>{{ e.fecha_creacion|date:"d" }}</strong>
+                <span>{{ e.fecha_creacion|date:"M Y"|upper }}</span>
+            </div>
+
+            <!-- Punto de la línea de tiempo -->
+            <span class="hist-dot"></span>
+
+            <!-- Tarjeta de la evaluación -->
+            <article class="hist-card">
+
+                <!-- Software y organización -->
+                <div class="hist-main">
+                    <h3>{{ e.software }}</h3>
+                    <small>{{ e.organizacion.nombre }}</small>
+                </div>
+
+                <!-- Resultado y ponderación media -->
+                <div class="hist-result">
+                    <span class="res-badge {{ e.clase_etiqueta }}">{{ e.etiqueta }}</span>
+                    {% if e.ponderacion_media %}
+                        <small>Ponderación media <b>{{ e.ponderacion_media|floatformat:2 }}</b></small>
+                    {% endif %}
+                </div>
+
+                <!-- Conteo FODA -->
+                <div class="hist-foda" title="Fortalezas · Oportunidades · Debilidades · Amenazas">
+                    <span class="foda-count f"><b>{{ e.fortalezas }}</b><i>F</i></span>
+                    <span class="foda-count o"><b>{{ e.oportunidades }}</b><i>O</i></span>
+                    <span class="foda-count d"><b>{{ e.debilidades }}</b><i>D</i></span>
+                    <span class="foda-count a"><b>{{ e.amenazas }}</b><i>A</i></span>
+                </div>
+
+                <!-- Acciones -->
+                <div class="hist-actions">
+                    <a href="{% url 'evaluacion:ver_evaluacion' e.pk %}"class="hist-btn-ver">Ver</a>
+                    <a href="{% url 'evaluacion:exportar_evaluacion' e.pk %}" class="hist-btn">Exportar</a>
+                </div>
+
+
+        </div>
+
+    {% empty %}
+
+        <!-- Estado vacío -->
+        <div class="panel-empty-state">
+            <div class="panel-empty-icon"><i class="bi bi-clock-history"></i></div>
+            <h2>No hay evaluaciones para mostrar</h2>
+            <p>Cuando guardes evaluaciones o cambies los filtros, aparecerán aquí.</p>
+            <a href="{% url 'evaluacion:nueva_evaluacion' %}" class="btn-panel-primary">
+                + Nueva evaluación
+            </a>
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

@@ -23,7 +23,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "guiospro_db",
         "USER": "postgres",
-        "PASSWORD": "123",
+        "PASSWORD": "kristel",
         "HOST": "localhost",
         "PORT": "5432",
     }
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "allauth.account",
 
     "evaluacion",
+    "importancia_sugerida",
 ]
 
 

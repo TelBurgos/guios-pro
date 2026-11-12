@@ -1,43 +1,215 @@
-/* ==========================================
-   TIPOGRAFÍA
-   ========================================== */
-
-body {
-    font-family: 'Inter', sans-serif;
+/* ---------- Nueva evaluación ---------- */
+.nueva-aside {
+    padding: 1.8rem;
+    border-radius: 22px;
+    color: #fff;
+    background: linear-gradient(160deg, #8a2fb8 0%,
+#4b1f86 50%,
+#2a1b66 100%);
+    box-shadow: 0 24px 50px rgba(74, 28, 128, .35);
 }
 
-/* ==========================================
-   TABLAS DE EVALUACIÓN
-   ========================================== */
-
-.table td {
-    min-width: 110px;
+.nueva-aside h1 {
+    margin: 0 0 .7rem;
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
 }
 
-.table td:first-child {
-    min-width: 240px;
+.nueva-aside p {
+    margin: 0;
+    font-size: .78rem;
+    line-height: 1.6;
+    opacity: .85;
 }
 
-/* ==========================================
-   PESTAÑAS DE EVALUACIÓN
-   ========================================== */
-
-.nav-tabs .nav-link {
-    font-size: .9rem;
+.nueva-steps {
+    display: grid;
+    gap: 1rem;
+    margin: 1.8rem 0 0;
+    padding: 0;
+    list-style: none;
 }
 
-/* ==========================================
-   CONTROLES DE VALORACIÓN
-   ========================================== */
-
-.form-range {
-    min-width: 110px;
+.nueva-steps li {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
 }
 
-/* ==========================================
-   TÍTULOS DE LOS PASOS
-   ========================================== */
+.nueva-steps strong {
+    display: block;
+    font-size: .85rem;
+    line-height: 1.2;
+}
 
-.tab-pane > h5 {
+.nueva-steps small {
+    font-size: .68rem;
+    opacity: .75;
+}
+
+.step-dot {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 50%;
+    font-size: .75rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, .15);
+}
+
+.nueva-steps li.active .step-dot {
+    border-color: #fff;
+    background: #fff;
+    color: var(--g-purple-dark);
+}
+
+.nueva-card {
+    padding: 1.8rem;
+    border-radius: 22px;
+    background: var(--g-card);
+    box-shadow: var(--g-shadow);
+}
+
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1.1rem;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.form-step {
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: .7rem;
+    font-weight: 800;
+    background: var(--g-lilac);
+    color: var(--g-purple-dark);
+}
+
+.form-divider {
+    margin: 1.5rem 0;
+    border: 0;
+    border-top: 1px solid var(--g-line);
+    opacity: 1;
+}
+
+.form-field {
     margin-bottom: 1rem;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: .3rem;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--g-text);
+}
+
+.form-field input:not([type="checkbox"]):not([type="radio"]),
+.form-field select,
+.form-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: .7rem .9rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background-color: var(--g-lilac);
+    color: var(--g-ink);
+    font-size: .85rem;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+    color: #8d84a3;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+    outline: 0;
+    border-color: var(--g-purple);
+    background-color: var(--g-card);
+    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+}
+
+.form-field textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.optional-label {
+    margin-left: .2rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.form-error {
+    margin-top: .3rem;
+    font-size: .72rem;
+    color: #b3261e;
+}
+
+.nueva-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .7rem;
+    margin-top: 1.6rem;
+}
+
+.btn-cancelar,
+.btn-continuar {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .65rem 1.3rem;
+    border-radius: 10px;
+    font-size: .85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.btn-cancelar {
+    border: 1px solid var(--g-line);
+    background: var(--g-card);
+    color: var(--g-ink);
+}
+
+.btn-cancelar:hover {
+    background: var(--g-lilac);
+    color: var(--g-purple-dark);
+}
+
+.btn-continuar {
+    border: 0;
+    color: #fff;
+    background: linear-gradient(180deg, #9b4fd6,
+#6d2aa6);
+    box-shadow: 0 8px 18px rgba(109, 42, 166, .35);
+}
+
+.btn-continuar:hover {
+    filter: brightness(1.05);
+}
+
+@media (max-width: 767.98px) {
+    .dash-nav {
+        flex-wrap: wrap;
+        gap: .8rem;
+    }
+
+    .panel-hero {
+        padding: 1.5rem;
+    }
 }

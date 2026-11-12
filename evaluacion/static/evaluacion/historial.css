@@ -1,0 +1,344 @@
+/* ==========================================================
+ * historial.css — pantalla "Historial de evaluaciones"
+ * Usa las variables de theme.css, así que funciona en claro y oscuro.
+ * ========================================================== */
+
+/* ---------- Encabezado ---------- */
+.hist-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: .6rem 0 1.4rem;
+}
+
+/* Etiqueta pequeña sobre el título */
+.hist-kicker {
+    display: block;
+    margin-bottom: .25rem;
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .14em;
+    color: var(--g-purple);
+}
+
+.hist-head h1 {
+    margin: 0 0 .3rem;
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--g-ink);
+}
+
+.hist-head p {
+    margin: 0;
+    font-size: .85rem;
+    color: var(--g-text);
+}
+
+/* Botones "Exportar todo" y "+ Nueva evaluación" */
+.hist-head-actions {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+}
+
+/* ---------- Barra de filtros ---------- */
+.hist-filters {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.8rem;
+    padding: .7rem;
+    border-radius: 18px;
+    background: var(--g-card);
+    box-shadow: var(--g-shadow);
+}
+
+/* Buscador con icono de lupa */
+.hist-search {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    margin: 0;
+}
+
+.hist-search i {
+    position: absolute;
+    left: .9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .8rem;
+    color: var(--g-purple);
+    pointer-events: none;
+}
+
+.hist-search input {
+    width: 100%;
+    padding: .65rem 1rem .65rem 2.4rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: var(--g-lilac);
+    color: var(--g-ink);
+    font: inherit;
+    font-size: .8rem;
+}
+
+.hist-search input::placeholder {
+    color: #8d84a3;
+}
+
+/* Selectores con forma de píldora y flecha propia */
+.hist-filters select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: .65rem 2rem .65rem 1rem;
+    border: 1px solid var(--g-line);
+    border-radius: 999px;
+    background-color: var(--g-card);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237b2fb5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .85rem center;
+    color: var(--g-ink);
+    font: inherit;
+    font-size: .76rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.hist-filters input:focus,
+.hist-filters select:focus {
+    outline: 0;
+    border-color: var(--g-purple);
+    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+}
+
+/* ---------- Línea de tiempo ---------- */
+.hist-list {
+    position: relative;
+}
+
+/* Cada fila: fecha | punto | tarjeta */
+.hist-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px 18px minmax(0, 1fr);
+    align-items: center;
+    gap: .8rem;
+    margin-bottom: 1rem;
+}
+
+/* Línea vertical que une los puntos (pasa por el centro de la columna del punto) */
+.hist-row::before {
+    content: "";
+    position: absolute;
+    left: calc(64px + .8rem + 8px);
+    top: 0;
+    bottom: -1rem;
+    width: 2px;
+    background: linear-gradient(180deg, var(--g-purple), var(--g-line));
+    opacity: .55;
+}
+
+/* La línea empieza en el primer punto y termina en el último */
+.hist-row:first-child::before {
+    top: 50%;
+}
+
+.hist-row:last-child::before {
+    bottom: 50%;
+}
+
+/* Fecha: día grande y mes/año pequeño */
+.hist-date {
+    text-align: center;
+    line-height: 1;
+}
+
+.hist-date strong {
+    display: block;
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--g-ink);
+}
+
+.hist-date span {
+    display: block;
+    margin-top: .25rem;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--g-text);
+}
+
+/* Punto de la línea de tiempo */
+.hist-dot {
+    position: relative;
+    z-index: 1;
+    width: 14px;
+    height: 14px;
+    justify-self: center;
+    border-radius: 50%;
+    background: var(--g-purple);
+    box-shadow: 0 0 0 4px var(--g-lilac), 0 0 0 5px var(--g-card);
+}
+
+/* ---------- Tarjeta de evaluación ---------- */
+.hist-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) auto auto;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 1.05rem 1.4rem;
+    border: 1px solid var(--g-line);
+    border-radius: 18px;
+    background: var(--g-card);
+    box-shadow: 0 10px 28px rgba(60, 20, 100, .1);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.hist-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba(60, 20, 100, .18);
+}
+
+/* Software y organización */
+.hist-main h3 {
+    margin: 0 0 .15rem;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--g-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hist-main small {
+    font-size: .72rem;
+    color: var(--g-text);
+}
+
+/* Etiqueta de resultado + ponderación media */
+.hist-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .35rem;
+}
+
+.hist-result small {
+    font-size: .7rem;
+    color: var(--g-text);
+}
+
+.hist-result small b {
+    margin-left: .25rem;
+    font-size: .85rem;
+    font-weight: 800;
+    color: var(--g-purple-dark);
+}
+
+/* ---------- Etiquetas de resultado ---------- */
+.res-badge {
+    display: inline-block;
+    padding: .22rem .7rem;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+.res-a    { background: #d9f3e6; color: #1b7a4b; }
+.res-b    { background: #fdebc8; color: #9a5b00; }
+.res-c    { background: #fde0e0; color: #b3261e; }
+.res-none { background: var(--g-lilac); color: var(--g-text); }
+
+/* ---------- Conteo FODA: número arriba, letra abajo ---------- */
+.hist-foda {
+    display: flex;
+    gap: .4rem;
+}
+
+.foda-count {
+    width: 38px;
+    padding: .4rem 0 .35rem;
+    text-align: center;
+    border-radius: 10px;
+    line-height: 1;
+}
+
+.foda-count b {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.foda-count i {
+    display: block;
+    margin-top: .2rem;
+    font-size: .58rem;
+    font-style: normal;
+    font-weight: 700;
+    opacity: .75;
+}
+
+.foda-count.f { background: #d9f3e6; color: #1b7a4b; }
+.foda-count.o { background: #dde8fb; color: #2a57b5; }
+.foda-count.d { background: #fdebc8; color: #9a5b00; }
+.foda-count.a { background: #fde0e0; color: #b3261e; }
+
+/* ---------- Botones "Ver" y "Exportar" ---------- */
+.hist-actions {
+    display: flex;
+    gap: .45rem;
+}
+
+.hist-btn {
+    padding: .5rem 1rem;
+    border: 1px solid var(--g-line);
+    border-radius: 10px;
+    background: var(--g-card);
+    color: var(--g-ink);
+    font-size: .74rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hist-btn:hover {
+    background: var(--g-lilac);
+    color: var(--g-purple-dark);
+}
+
+/* "Ver" resaltado en lila */
+.hist-btn-ver {
+    border-color: transparent;
+    background: var(--g-lilac);
+    color: var(--g-purple-dark);
+}
+
+/* ---------- Adaptación a pantallas pequeñas ---------- */
+@media (max-width: 991.98px) {
+    .hist-card {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hist-row {
+        grid-template-columns: 48px 14px minmax(0, 1fr);
+        gap: .6rem;
+    }
+
+    .hist-row::before {
+        left: calc(48px + .6rem + 6px);
+    }
+
+    .hist-date strong {
+        font-size: 1.5rem;
+    }
+
+    .hist-card {
+        grid-template-columns: 1fr;
+    }
+}

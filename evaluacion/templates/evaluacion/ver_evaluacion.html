@@ -1,0 +1,96 @@
+{% extends "evaluacion/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}{{ ev.software }} | GUIOS PRO{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=9">
+
+<div class="eval-root">
+
+<header class="eval-head">
+    <span class="eval-eyebrow">Resultado · {{ ev.organizacion.nombre }}</span>
+    <h1 class="eval-title">{{ ev.software }}</h1>
+    <p class="eval-sub">Evaluación del {{ ev.fecha_creacion|date:"d M Y" }}. Solo lectura.</p>
+</header>
+
+{% if pond_rows %}
+
+<!-- PONDERACIÓN -->
+<div class="eval-pondlayout">
+    <div class="eval-card eval-pondcard">
+        <h2 class="eval-cardtitle">Ponderación por factor</h2>
+        {% for r in pond_rows %}
+        <div class="eval-bar">
+            <div class="eval-bar-top">
+                <span>{{ r.name }}</span>
+                <strong class="tone-{{ r.tone }}">{{ r.score|floatformat:2 }}</strong>
+            </div>
+            <div class="eval-bar-track"><span style="width: {{ r.pct }}%"></span></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <aside class="eval-pondside">
+        <div class="eval-ringcard">
+            <span class="eval-ring-label">Ponderación media</span>
+            <div class="eval-ring" style="--pct: {{ pond_pct }}">
+                <div class="eval-ring-inner">
+                    <strong>{{ pond_media|floatformat:2 }}</strong>
+                    <small>de {{ escala }}.00</small>
+                </div>
+            </div>
+            <span class="eval-level">{{ pond_nivel }}</span>
+        </div>
+    </aside>
+</div>
+
+<!-- FODA Y RECOMENDACIÓN -->
+<div class="eval-fodalayout" style="margin-top:1.1rem">
+    <div class="eval-fodagrid">
+        {% for g in foda_groups %}
+        <article class="eval-card eval-fodacard">
+            <header class="eval-fodahead">
+                <span class="eval-fodaletter {{ g.css }}">{{ g.letter }}</span>
+                <div>
+                    <h3>{{ g.title }}</h3>
+                    <small>{{ g.count }} factor{{ g.count|pluralize:"es" }}</small>
+                </div>
+            </header>
+            <div class="eval-chips">
+                {% for name in g.names %}
+                <span class="eval-chip {{ g.css }}">{{ name }}</span>
+                {% empty %}
+                <span class="eval-chip is-empty">Sin factores</span>
+                {% endfor %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <aside class="eval-recocard">
+        <span class="eval-recopill">Recomendación</span>
+        <h2>{{ reco_title }}</h2>
+        <p>{{ reco_body }}</p>
+        {% if reco_actions %}
+        <ul class="eval-recolist">
+            {% for action in reco_actions %}<li>{{ action }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+    </aside>
+</div>
+
+{% else %}
+<div class="eval-banner">
+    <span>Esta evaluación aún no tiene subfactores valorados.</span>
+</div>
+{% endif %}
+
+<div class="eval-actionbar">
+    <span class="eval-actionbar-text"></span>
+    <a href="{% url 'evaluacion:historial' %}" class="btn-cancelar">← Volver al historial</a>
+    <a href="{% url 'evaluacion:exportar_evaluacion' ev.pk %}" class="btn-continuar">Exportar</a>
+</div>
+
+</div>
+{% endblock %}

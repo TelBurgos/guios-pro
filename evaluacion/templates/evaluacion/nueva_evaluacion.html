@@ -1,17 +1,10 @@
-
 {% extends "evaluacion/dashboard_base.html" %}
 
 {% block title %}Nueva evaluación | GUIOS PRO{% endblock %}
 
 {% block content %}
 
-<div class="page-heading">
-    <p class="page-eyebrow">NUEVA EVALUACIÓN</p>
-    <h1>Comienza una nueva evaluación</h1>
-    <p>Registra los datos base para iniciar el análisis.</p>
-</div>
-
-<form method="post" action="{% url 'evaluacion:nueva_evaluacion' %}">
+<form method="post" action="{% url 'evaluacion:nueva_evaluacion' %}" class="nueva-form">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -20,113 +13,170 @@
         </div>
     {% endif %}
 
-    <div class="row g-4">
+    <div class="row g-4 align-items-start">
 
-        <!-- DATOS DE LA ORGANIZACIÓN -->
-        <div class="col-12 col-xl-6">
+        <!-- PANEL LATERAL CON LOS PASOS -->
+        <aside class="col-lg-4">
 
-            <section class="evaluation-card h-100">
+            <div class="nueva-aside">
 
-                <div class="evaluation-card-header">
-                    <span class="step-icon">01</span>
+                <h1>Nueva evaluación</h1>
 
-                    <div>
-                        <h2>Datos de la organización</h2>
-                        <p>¿Quién utilizará el software?</p>
+                <p>
+                    Registra la organización y el software para iniciar
+                    el análisis guiado de GUIOS.
+                </p>
+
+                <ol class="nueva-steps">
+
+                    <li class="active">
+                        <span class="step-dot">1</span>
+                        <span>
+                            <strong>Organización</strong>
+                            <small>Quién evalúa</small>
+                        </span>
+                    </li>
+
+                    <li>
+                        <span class="step-dot">2</span>
+                        <span>
+                            <strong>Software</strong>
+                            <small>Qué se evalúa</small>
+                        </span>
+                    </li>
+
+                    <li>
+                        <span class="step-dot">3</span>
+                        <span>
+                            <strong>Confirmar</strong>
+                            <small>Inicia el flujo</small>
+                        </span>
+                    </li>
+
+                </ol>
+
+            </div>
+
+        </aside>
+
+        <!-- FORMULARIO -->
+        <div class="col-lg-8">
+
+            <section class="nueva-card">
+
+                <!-- 1. DATOS DE LA ORGANIZACIÓN -->
+                <h2 class="form-section-title">
+                    <span class="form-step">1</span>
+                    Datos de la organización
+                </h2>
+
+                {% if form.organizacion_existente %}
+
+                    <div class="form-field">
+                        <label for="{{ form.organizacion_existente.id_for_label }}">
+                            Organización existente
+                        </label>
+                        {{ form.organizacion_existente }}
+                        {% for e in form.organizacion_existente.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
                     </div>
-                </div>
 
-                <div class="mb-4">
+                    <div class="row g-3">
 
-                    <label for="organizacion" class="form-label">
-                        Organización
-                    </label>
+                        {% if form.organizacion_nueva %}
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="{{ form.organizacion_nueva.id_for_label }}">
+                                        O registrar nueva
+                                    </label>
+                                    {{ form.organizacion_nueva }}
+                                    {% for e in form.organizacion_nueva.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
 
-                    {{ form.organizacion }}
+                        {% if form.sector %}
+                            <div class="col-md-6">
+                                <div class="form-field">
+                                    <label for="{{ form.sector.id_for_label }}">
+                                        Sector
+                                    </label>
+                                    {{ form.sector }}
+                                    {% for e in form.sector.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
 
-                    {{ form.organizacion.errors }}
-
-                </div>
-
-            </section>
-
-        </div>
-
-        <!-- SOFTWARE A EVALUAR -->
-        <div class="col-12 col-xl-6">
-
-            <section class="evaluation-card h-100">
-
-                <div class="evaluation-card-header">
-                    <span class="step-icon purple">02</span>
-
-                    <div>
-                        <h2>Software a evaluar</h2>
-                        <p>Cuéntanos sobre la solución.</p>
                     </div>
+
+                {% else %}
+
+                    <!-- Formulario actual: un solo campo de organización -->
+                    <div class="form-field">
+                        <label for="{{ form.organizacion.id_for_label }}">
+                            Organización
+                        </label>
+                        {{ form.organizacion }}
+                        {% for e in form.organizacion.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                    </div>
+
+                {% endif %}
+
+                <hr class="form-divider">
+
+                <!-- 2. SOFTWARE A EVALUAR -->
+                <h2 class="form-section-title">
+                    <span class="form-step">2</span>
+                    Software a evaluar
+                </h2>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <div class="form-field">
+                            <label for="{{ form.software.id_for_label }}">
+                                Nombre del software
+                            </label>
+                            {{ form.software }}
+                            {% for e in form.software.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-field">
+                            <label for="{{ form.categoria.id_for_label }}">
+                                Categoría
+                            </label>
+                            {{ form.categoria }}
+                            {% for e in form.categoria.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="mb-4">
-
-                    <label for="software" class="form-label">
-                        Nombre del software
-                    </label>
-
-                    {{ form.software }}
-
-                    {{ form.software.errors }}
-
-                </div>
-
-                <div class="mb-4">
-
-                    <label for="categoria" class="form-label">
-                        Categoría
-                    </label>
-
-                    {{ form.categoria }}
-
-                    {{ form.categoria.errors }}
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label for="descripcion" class="form-label">
+                <div class="form-field">
+                    <label for="{{ form.descripcion.id_for_label }}">
                         Descripción
-                        <span class="optional-label">Opcional</span>
+                        <span class="optional-label">(opcional)</span>
                     </label>
-
                     {{ form.descripcion }}
+                    {% for e in form.descripcion.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
 
-                    {{ form.descripcion.errors }}
+                <!-- ACCIONES -->
+                <div class="nueva-actions">
+
+                    <a href="{% url 'evaluacion:panel' %}" class="btn-cancelar">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn-continuar">
+                        Crear y continuar
+                        <span aria-hidden="true">→</span>
+                    </button>
 
                 </div>
 
             </section>
-
-        </div>
-
-    </div>
-
-    <div class="evaluation-footer">
-
-        <div class="evaluation-actions">
-
-            <a
-                href="{% url 'evaluacion:panel' %}"
-                class="btn-cancelar"
-                style="text-decoration: none;"
-            >
-                <i class="bi bi-x-lg"></i>
-                Cancelar
-            </a>
-
-            <button type="submit" class="btn-continuar">
-                <i class="bi bi-floppy"></i>
-                Guardar y continuar
-                <i class="bi bi-arrow-right"></i>
-            </button>
 
         </div>
 

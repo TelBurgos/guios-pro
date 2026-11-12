@@ -1,0 +1,133 @@
+/* ==========================================================
+ * theme.css — base compartida de GUIOS PRO
+ * Fondo, tokens, tipografía, marca y botón principal.
+ * Cargar SIEMPRE antes de auth.css y dashboard.css.
+ * ========================================================== */
+
+:root {
+    --g-ink: #1d1233;
+    --g-text: #5b5470;
+    --g-purple: #7b2fb5;
+    --g-purple-dark: #5a1f8a;
+    --g-lilac: #ede3f8;
+    --g-bg: #f5f0fb;
+    --g-card: #ffffff;
+    --g-line: #ece3f6;
+    --g-shadow: 0 24px 60px rgba(60, 20, 100, .18);
+}
+
+[data-theme="dark"] {
+    --g-ink: #f1eafb;
+    --g-text: #b9afcf;
+    --g-lilac: #2c2142;
+    --g-bg: #150d24;
+    --g-card: #1f1533;
+    --g-line: #352a4d;
+    --g-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+}
+
+/* ---------- Fondo (sin HTML extra: dos manchas con pseudo-elementos) ---------- */
+body.theme-pro {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    color: var(--g-ink);
+    background:
+        radial-gradient(420px 300px at 68% 0, rgba(217, 196, 239, .65), transparent 70%),
+        linear-gradient(135deg, var(--g-bg) 0%, var(--g-bg) 100%);
+}
+
+body.theme-pro::before,
+body.theme-pro::after {
+    content: "";
+    position: fixed;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+}
+
+body.theme-pro::before {
+    width: 540px;
+    height: 540px;
+    top: -170px;
+    left: -150px;
+    background: #c9a4e8;
+    opacity: .75;
+}
+
+body.theme-pro::after {
+    width: 580px;
+    height: 580px;
+    bottom: -250px;
+    right: -170px;
+    background: #8d73b8;
+    opacity: .8;
+}
+
+[data-theme="dark"] body.theme-pro::before,
+[data-theme="dark"] body.theme-pro::after {
+    opacity: .3;
+}
+
+/* ---------- Marca ---------- */
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-weight: 800;
+    background: linear-gradient(135deg, #9b4fd6, #5a1f8a);
+    box-shadow: 0 6px 14px rgba(90, 31, 138, .35);
+}
+
+.brand-name {
+    font-weight: 800;
+    letter-spacing: .01em;
+    color: var(--g-ink);
+}
+
+.brand-name small {
+    font-weight: 600;
+    color: var(--g-purple);
+    font-size: 1em;
+}
+
+/* ---------- Botón principal (login, registro, formularios) ---------- */
+.btn-grad {
+    border: 0;
+    border-radius: 10px;
+    padding: .75rem 1.2rem;
+    color: #fff;
+    font-weight: 700;
+    font-size: .9rem;
+    background: linear-gradient(180deg, #9b4fd6, #6d2aa6);
+    box-shadow: 0 8px 18px rgba(109, 42, 166, .35);
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+}
+
+.btn-grad:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(109, 42, 166, .4);
+    color: #fff;
+}
+
+.btn-grad:focus-visible {
+    outline: 3px solid rgba(123, 47, 181, .4);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-grad {
+        transition: none;
+    }
+}

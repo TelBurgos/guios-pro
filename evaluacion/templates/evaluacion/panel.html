@@ -1,54 +1,126 @@
-
 {% extends "evaluacion/dashboard_base.html" %}
 
 {% block title %}Panel | GUIOS PRO{% endblock %}
 
 {% block content %}
 
-<!-- ENCABEZADO DEL PANEL -->
-<div class="panel-header">
+<!-- BANNER DE BIENVENIDA -->
+<section class="panel-hero">
 
     <div>
-        <p class="page-eyebrow">PANEL</p>
+        <h1>Hola, {{ request.user.first_name|default:request.user.email }}</h1>
 
-        <h1 class="panel-title">
-            Mis evaluaciones
-        </h1>
+        {% if evaluaciones %}
+            <p>
+                Tienes {{ en_progreso|default:0 }}
+                {% if en_progreso == 1 %}evaluación{% else %}evaluaciones{% endif %}
+                en progreso. Retoma donde lo dejaste.
+            </p>
+        {% else %}
+            <p>Aún no tienes evaluaciones. Crea la primera para comenzar.</p>
+        {% endif %}
 
-        <p class="panel-subtitle">
-            Gestiona y da seguimiento a tus evaluaciones de adopción.
+        <div class="hero-actions">
+            <a class="btn-white" href="{% url 'evaluacion:nueva_evaluacion' %}">+ Nueva evaluación</a>
+            <a class="btn-ghost" href="{% url 'evaluacion:historial' %}">Ver historial</a>
+        </div>
+    </div>
+
+    <div class="hero-stats">
+        <div class="hero-stat"><strong>{{ total|default:0 }}</strong><span>evaluaciones</span></div>
+        <div class="hero-stat"><strong>{{ en_progreso|default:0 }}</strong><span>en progreso</span></div>
+        <div class="hero-stat"><strong>{{ completadas|default:0 }}</strong><span>completadas</span></div>
+    </div>
+
+</section>
+
+{% if evaluaciones %}
+
+    <!-- EVALUACIONES RECIENTES -->
+    <div class="list-head">
+        <h2>Evaluaciones recientes</h2>
+
+        <div class="filters" role="group" aria-label="Filtrar evaluaciones">
+            <button type="button" class="active" data-filter="todas">Todas</button>
+            <button type="button" data-filter="en-progreso">En progreso</button>
+            <button type="button" data-filter="completada">Completadas</button>
+        </div>
+    </div>
+
+    <div class="eval-grid">
+        {% for ev in evaluaciones %}
+            <article class="eval-card" data-status="{{ ev.estado_slug }}">
+
+                <div class="eval-top">
+                    <span class="eval-initial">{{ ev.nombre|slice:":1"|upper }}</span>
+                    <span class="badge-status {{ ev.estado_slug }}">{{ ev.estado }}</span>
+                </div>
+
+                <h3>{{ ev.nombre }}</h3>
+                <div class="eval-org">{{ ev.organizacion }}</div>
+
+                <div class="eval-step">
+                    <span>{{ ev.paso }}</span>
+                    <b>{{ ev.progreso }}%</b>
+                </div>
+
+                <div class="progress-track">
+                    <span style="width: {{ ev.progreso }}%"></span>
+                </div>
+
+                <div class="eval-foot">
+                    <span>{{ ev.fecha|date:"d M Y" }}</span>
+                    {% if ev.estado_slug == 'completada' %}
+                        <a href="{{ ev.url }}">Ver resultado →</a>
+                    {% else %}
+                        <a href="{{ ev.url }}">Continuar →</a>
+                    {% endif %}
+                </div>
+
+            </article>
+        {% endfor %}
+    </div>
+
+{% else %}
+
+    <!-- ESTADO SIN EVALUACIONES -->
+    <div class="panel-empty-state">
+
+        <div class="panel-empty-icon">
+            <i class="bi bi-clipboard2-check"></i>
+        </div>
+
+        <h2>Aún no tienes evaluaciones</h2>
+
+        <p>
+            Comienza registrando una organización y el software
+            que deseas evaluar. Aquí podrás consultar tus
+            evaluaciones y dar seguimiento a sus resultados.
         </p>
+
+        <a href="{% url 'evaluacion:nueva_evaluacion' %}" class="btn-panel-primary">
+            <i class="bi bi-plus-lg"></i>
+            Crear primera evaluación
+        </a>
+
     </div>
 
-    <a href="{% url 'evaluacion:nueva_evaluacion' %}"
-       class="btn-panel-primary">
-        <i class="bi bi-plus-lg"></i>
-        Nueva evaluación
-    </a>
+{% endif %}
 
-</div>
+{% endblock %}
 
-<!-- ESTADO SIN EVALUACIONES -->
-<div class="panel-empty-state">
+{% block extra_js %}
+<script>
+    document.querySelectorAll('[data-filter]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('[data-filter]').forEach(function (b) {
+                b.classList.toggle('active', b === btn);
+            });
 
-    <div class="panel-empty-icon">
-        <i class="bi bi-clipboard2-check"></i>
-    </div>
-
-    <h2>Aún no tienes evaluaciones</h2>
-
-    <p>
-        Comienza registrando una organización y el software
-        que deseas evaluar. Aquí podrás consultar tus
-        evaluaciones y dar seguimiento a sus resultados.
-    </p>
-
-    <a href="{% url 'evaluacion:nueva_evaluacion' %}"
-       class="btn-panel-primary">
-        <i class="bi bi-plus-lg"></i>
-        Crear primera evaluación
-    </a>
-
-</div>
-
+            document.querySelectorAll('.eval-card').forEach(function (card) {
+                card.hidden = btn.dataset.filter !== 'todas' && card.dataset.status !== btn.dataset.filter;
+            });
+        });
+    });
+</script>
 {% endblock %}

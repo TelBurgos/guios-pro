@@ -1,510 +1,655 @@
-
 {% extends "evaluacion/dashboard_base.html" %}
 {% load static %}
 
 {% block title %}Evaluación de software | GUIOS PRO{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'evaluacion/style.css' %}">
-{% endblock %}
-
 {% block content %}
 
-<!-- EVALUACIÓN ORIGINAL DE GUIOSPRO -->
+<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=12">
+
+<div class="eval-root">
+
+<!-- ENCABEZADO (el texto cambia según el paso) -->
+<header class="eval-head">
+    <span class="eval-eyebrow">
+        Evaluación{% if evaluacion %} · {{ evaluacion.software }}{% endif %}
+    </span>
+    <h1 class="eval-title" id="eval-title">Factores relevantes</h1>
+    <p class="eval-sub" id="eval-lead">
+        Activa los factores que importan a tu organización. Se muestran con su importancia sugerida (IS).
+    </p>
+</header>
 
 {% if error %}
-    <div class="alert alert-warning">
-        {{ error }}
-    </div>
+    <div class="eval-alert">{{ error }}</div>
 {% endif %}
 
-<!-- PESTAÑAS DE EVALUACIÓN -->
-<ul class="nav nav-tabs mb-3" id="sections" role="tablist">
-
-    <li class="nav-item">
+<!-- STEPPER -->
+<ul class="nav eval-stepper" id="sections" role="tablist">
+    <li class="nav-item" role="presentation">
         <button
             class="nav-link {% if tab == 'factores' %}active{% endif %}"
             data-bs-toggle="tab"
             data-bs-target="#factores"
             type="button"
+            role="tab"
         >
-            Paso 1 y 2. Obtención de factores relevantes
+            <span class="eval-step-num">1</span>
+            <span>Factores relevantes</span>
         </button>
     </li>
-
-    <li class="nav-item">
+    <li class="nav-item" role="presentation">
         <button
             class="nav-link {% if tab == 'subfactores' %}active{% endif %}"
             data-bs-toggle="tab"
             data-bs-target="#subfactores"
             type="button"
+            role="tab"
         >
-            Paso 3 y 4. Obtención de factores ponderados
+            <span class="eval-step-num">2</span>
+            <span>Subfactores</span>
         </button>
     </li>
-
-    <li class="nav-item">
+    <li class="nav-item" role="presentation">
+        <button
+            class="nav-link {% if tab == 'ponderacion' %}active{% endif %}"
+            data-bs-toggle="tab"
+            data-bs-target="#ponderacion"
+            type="button"
+            role="tab"
+        >
+            <span class="eval-step-num">3</span>
+            <span>Ponderación</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
         <button
             class="nav-link {% if tab == 'resultados' %}active{% endif %}"
             data-bs-toggle="tab"
             data-bs-target="#resultados"
             type="button"
+            role="tab"
         >
-            Paso 5 y 6. Evaluación y recomendación sobre la adopción
+            <span class="eval-step-num">4</span>
+            <span>FODA y recomendación</span>
         </button>
     </li>
-
 </ul>
 
 <div class="tab-content">
 
-    <!-- ===================================================== -->
-    <!-- PASO 1 Y 2: OBTENCIÓN DE FACTORES RELEVANTES -->
-    <!-- ===================================================== -->
-
+    <!-- ========== PASO 1: FACTORES RELEVANTES ========== -->
     <section
         class="tab-pane fade {% if tab == 'factores' %}show active{% endif %}"
         id="factores"
     >
-
-        <h5>Paso 1 y 2. Obtención de factores relevantes</h5>
-
-        <p>
-            El objetivo de este paso es determinar qué factores resultan
-            relevantes para el análisis de la adopción. Para ello, usted
-            deberá evaluar la importancia que tienen los factores para su
-            organización. Asimismo, deberá clasificar aquellos que pueden
-            ser, de acuerdo al alcance de su impacto, internos o externos.
-        </p>
-
-        <form method="post">
-            {% csrf_token %}
-
-            <input type="hidden" name="action" value="factors">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered table-hover align-middle bg-white">
-
-                    <thead class="table-secondary">
-                        <tr>
-                            <th>Factor</th>
-                            <th>Imp. Sugerida</th>
-                            <th>Evaluación</th>
-                            <th>Imp. Decisor</th>
-                            <th>Imp. Relativa</th>
-                            <th>Alcance</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for row in rows %}
-
-                            <tr>
-
-                                <td>{{ row.name }}</td>
-
-                                <td>{{ row.suggested }}</td>
-
-                                <td>
-                                    <input
-                                        class="form-range rating"
-                                        type="range"
-                                        min="1"
-                                        max="4"
-                                        step="1"
-                                        name="decisor_{{ row.id }}"
-                                        value="{{ row.decisor }}"
-                                        data-row="{{ row.id }}"
-                                        data-suggested="{{ row.suggested }}"
-                                        aria-label="Evaluación {{ row.name }}"
-                                    >
-                                </td>
-
-                                <td>
-                                    <span id="decisor-label-{{ row.id }}">
-                                        {{ row.decisor_label }}
-                                    </span>
-                                </td>
-
-                                <td>
-                                    <span id="relative-label-{{ row.id }}">
-                                        {{ row.relative }}
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    {% if row.scope == 'Ambos' %}
-
-                                        <select
-                                            class="form-select"
-                                            name="scope_{{ row.id }}"
-                                        >
-
-                                            <option
-                                                value="Interno"
-                                                {% if row.scope_selected == 'Interno' %}
-                                                    selected
-                                                {% endif %}
-                                            >
-                                                Interno
-                                            </option>
-
-                                            <option
-                                                value="Externo"
-                                                {% if row.scope_selected == 'Externo' %}
-                                                    selected
-                                                {% endif %}
-                                            >
-                                                Externo
-                                            </option>
-
-                                        </select>
-
-                                    {% else %}
-
-                                        {{ row.scope }}
-
-                                    {% endif %}
-
-                                </td>
-
-                            </tr>
-
-                        {% endfor %}
-
-                    </tbody>
-
-                </table>
-
+        <div class="eval-isbar">
+            <div>
+                <strong>
+                    {% if is_fecha %}
+                        Importancia sugerida actualizada el {{ is_fecha|date:"d M Y" }}
+                    {% else %}
+                        Importancia sugerida base
+                    {% endif %}
+                </strong>
+                <span>IS = literatura (IL) combinada con criterio experto (E), 2020–2025.</span>
             </div>
-
-            <button class="btn btn-primary" type="submit">
-                Guardar evaluación y continuar
-            </button>
-
-        </form>
-
-    </section>
-
-
-    <!-- ===================================================== -->
-    <!-- PASO 3 Y 4: OBTENCIÓN DE FACTORES PONDERADOS -->
-    <!-- ===================================================== -->
-
-    <section
-        class="tab-pane fade {% if tab == 'subfactores' %}show active{% endif %}"
-        id="subfactores"
-    >
-
-        <h5>Paso 3 y 4. Obtención de factores ponderados</h5>
-
-        <p>
-            El objetivo de este paso es establecer la relevancia que
-            tienen los subfactores que componen a los factores que
-            resultaron relevantes del paso anterior. Seleccione el
-            factor en la lista desplegable y cuando termine de
-            establecer la importancia por los subfactores, elija
-            guardar en el botón correspondiente.
-        </p>
-
-        {% if selected %}
-
-            <form method="post" class="mb-3">
-                {% csrf_token %}
-
-                <input type="hidden" name="action" value="subfactors">
-
-                <div class="row align-items-end g-2 mb-3">
-
-                    <div class="col-lg-8">
-
-                        <label
-                            for="factor_id"
-                            class="form-label fw-semibold"
-                        >
-                            Factor:
-                        </label>
-
-                        <select
-                            class="form-select"
-                            name="factor_id"
-                            id="factor_id"
-                            onchange="window.location.href='/?factor_id='+this.value+'#subfactores'"
-                        >
-
-                            {% for row in relevant %}
-
-                                <option
-                                    value="{{ row.id }}"
-                                    {% if row.id == selected.id %}
-                                        selected
-                                    {% endif %}
-                                >
-                                    {{ row.name }}
-                                </option>
-
-                            {% endfor %}
-
-                        </select>
-
-                    </div>
-
-                    <div class="col">
-
-                        <button type="submit" class="btn btn-primary">
-                            Guardar
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div class="table-responsive">
-
-                    <table class="table table-bordered align-middle bg-white">
-
-                        <thead class="table-secondary">
-
-                            <tr>
-                                <th>Subfactor</th>
-                                <th>Evaluación</th>
-                                <th>Resultado</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            {% for name in selected.subfactors %}
-
-                                <tr>
-
-                                    <td>{{ name }}</td>
-
-                                    <td>
-
-                                        <input
-                                            class="form-range subrating"
-                                            type="range"
-                                            min="1"
-                                            max="4"
-                                            step="1"
-                                            name="weight_{{ selected.id }}_{{ forloop.counter0 }}"
-                                            value="{% for value in selected.weights %}{% if forloop.counter0 == forloop.parentloop.counter0 %}{{ value }}{% endif %}{% endfor %}"
-                                            data-index="{{ forloop.counter0 }}"
-                                        >
-
-                                    </td>
-
-                                    <td>
-
-                                        <span
-                                            class="subresult"
-                                            id="subresult-{{ forloop.counter0 }}"
-                                        ></span>
-
-                                    </td>
-
-                                </tr>
-
-                            {% endfor %}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </form>
-
-        {% else %}
-
-            <div class="alert alert-info">
-                No hay factores relevantes con la evaluación actual.
-            </div>
-
-        {% endif %}
-
-    </section>
-
-
-    <!-- ===================================================== -->
-    <!-- PASO 5 Y 6: EVALUACIÓN Y RECOMENDACIÓN -->
-    <!-- ===================================================== -->
-
-    <section
-        class="tab-pane fade {% if tab == 'resultados' %}show active{% endif %}"
-        id="resultados"
-    >
-
-        <h5>Paso 5 y 6. Evaluación y recomendación sobre la adopción</h5>
-
-        <p>
-            En este paso se muestra la clasificación FODA de cada
-            factor atendiendo a su importancia global y alcance
-            para la organización. Si un factor no contiene valores,
-            no fue considerado relevante en el paso 1 y 2, o
-            todavía no se evaluaron sus subfactores.
-        </p>
-
-        <div class="table-responsive">
-
-            <table class="table table-bordered align-middle bg-white">
-
-                <thead class="table-secondary">
-
-                    <tr>
-                        <th>Factor</th>
-                        <th>Ponderación media del factor</th>
-                        <th>Alcance</th>
-                        <th>FODA</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for row in rows %}
-
-                        <tr>
-
-                            <td>{{ row.name }}</td>
-
-                            <td>
-                                {% if row.score != None %}
-                                    {{ row.score|floatformat:1 }}
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if row.score != None %}
-                                    {{ row.scope_selected }}
-                                {% endif %}
-                            </td>
-
-                            <td class="{% if row.foda == 'Fortaleza' or row.foda == 'Oportunidad' %}table-success{% elif row.foda == 'Debilidad' or row.foda == 'Amenaza' %}table-danger{% endif %}">
-
-                                {% if row.foda %}
-                                    {{ row.foda }}
-                                {% else %}
-                                    Subfactores no evaluados.
-                                {% endif %}
-
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
+            <a href="/importancia-sugerida/" class="btn-continuar">Actualizar con literatura</a>
         </div>
 
         <form method="post">
             {% csrf_token %}
+            <input type="hidden" name="action" value="factors">
 
-            <input
-                type="hidden"
-                name="action"
-                value="recommendation"
-            >
+            {% regroup rows by dimension as dimensiones %}
 
-            <button class="btn btn-primary" type="submit">
-                Ver recomendación
-            </button>
+            <div class="eval-card eval-table-card">
 
-        </form>
+                <div class="eval-dimtabs" role="tablist">
+                    {% for dim in dimensiones %}
+                    <button
+                        type="button"
+                        class="eval-dimtab {% if forloop.first %}active{% endif %}"
+                        data-dim="dim-{{ forloop.counter }}"
+                    >
+                        {{ dim.grouper }} · {{ dim.list|length }}
+                    </button>
+                    {% endfor %}
+                </div>
 
-        {% if recommendation != None %}
+                {% for dim in dimensiones %}
+                <div
+                    class="eval-dimpane {% if forloop.first %}active{% endif %}"
+                    id="dim-{{ forloop.counter }}"
+                >
+                    <div class="table-responsive">
+                        <table class="eval-ftable">
+                            <thead>
+                                <tr>
+                                    <th>Factor</th>
+                                    <th>IS</th>
+                                    <th>Importancia del decisor</th>
+                                    <th>Alcance</th>
+                                    <th>Relevancia GUIOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in dim.list %}
+                                <tr class="eval-frow" data-suggested="{{ row.suggested }}">
+                                    <td class="eval-fname">{{ row.name }}</td>
 
-            <div class="alert mt-3 {% if 'Recomendación C:' in recommendation %}alert-danger{% elif 'Recomendación B:' in recommendation %}alert-warning{% else %}alert-success{% endif %}">
+                                    <td class="eval-fis">{{ row.suggested }}</td>
 
-                {{ recommendation|default:'Todavía no existen subfactores evaluados.' }}
+                                    <td>
+                                        <div
+                                            class="eval-seg"
+                                            role="radiogroup"
+                                            aria-label="Importancia del decisor: {{ row.name }}"
+                                        >
+                                            {% for n in "1234" %}
+                                            <input
+                                                type="radio"
+                                                id="d{{ row.id }}-{{ n }}"
+                                                name="decisor_{{ row.id }}"
+                                                value="{{ n }}"
+                                                {% if row.decisor|stringformat:"s" == n %}checked{% endif %}
+                                            >
+                                            <label for="d{{ row.id }}-{{ n }}">{{ n }}</label>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if row.scope == 'Ambos' %}
+                                        <select
+                                            class="eval-select"
+                                            name="scope_{{ row.id }}"
+                                            aria-label="Alcance de {{ row.name }}"
+                                        >
+                                            <option value="Interno" {% if row.scope_selected == 'Interno' %}selected{% endif %}>Interno</option>
+                                            <option value="Externo" {% if row.scope_selected == 'Externo' %}selected{% endif %}>Externo</option>
+                                        </select>
+                                        {% else %}
+                                        <span class="eval-scope">{{ row.scope }}</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        <span class="eval-rel {% if row.relevant %}is-on{% endif %}">
+                                            {% if row.relevant %}Relevante{% else %}No relevante{% endif %}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="eval-tfoot">
+                        <span>{{ dim.list|length }} factores de la dimensión {{ dim.grouper|lower }}</span>
+                        <span class="eval-tfoot-link">Relevancia calculada</span>
+                    </div>
+                </div>
+                {% endfor %}
 
             </div>
 
+            <div class="eval-actionbar">
+                <span class="eval-pill" id="rel-count">{{ relevant|length }} relevantes</span>
+                <span class="eval-actionbar-text">
+                    Solo se evaluarán los subfactores de estos factores.
+                </span>
+                <button class="btn-continuar" type="submit">
+                    Continuar a subfactores →
+                </button>
+            </div>
+        </form>
+    </section>
+
+
+    <!-- ========== PASO 2: SUBFACTORES ========== -->
+    <section
+        class="tab-pane fade {% if tab == 'subfactores' %}show active{% endif %}"
+        id="subfactores"
+    >
+        {% if selected %}
+        <form method="post" id="sub-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="subfactors">
+            <input type="hidden" name="factor_id" value="{{ selected.id }}">
+
+            <div class="eval-sublayout">
+
+                <aside class="eval-sidebar">
+                    <span class="eval-sidebar-title">Factores relevantes</span>
+
+                    {% for f in factor_nav %}
+                    <a
+                        href="?factor_id={{ f.id }}#subfactores"
+                        class="eval-sidelink {% if f.active %}active{% endif %}"
+                    >
+                        <span>{{ f.name }}</span>
+                        <small class="js-side-count">{{ f.done }}/{{ f.total }}</small>
+                    </a>
+                    {% endfor %}
+                </aside>
+
+                <div class="eval-card eval-subcard">
+                    <header class="eval-subhead">
+                        <div>
+                            <span class="eval-eyebrow">Dimensión {{ selected.dimension|lower }}</span>
+                            <h2>{{ selected.name }}</h2>
+                        </div>
+                        <span class="eval-is-badge">
+                            IS {{ selected.suggested }}{% if is_label %} · {{ is_label }}{% endif %}
+                        </span>
+                    </header>
+
+                    <div class="eval-progress">
+                        <span id="sub-progress"></span>
+                    </div>
+
+                    {% for name, weight in sub_rows %}
+                    {% with idx=forloop.counter0 %}
+                    <div class="eval-subrow">
+                        <span class="eval-subnum">{{ forloop.counter }}</span>
+                        <span class="eval-subname">{{ name }}</span>
+
+                        <div class="eval-seg" role="radiogroup" aria-label="Evaluación: {{ name }}">
+                            {% for n in "1234" %}
+                            <input
+                                type="radio"
+                                id="w{{ selected.id }}-{{ idx }}-{{ n }}"
+                                name="weight_{{ selected.id }}_{{ idx }}"
+                                value="{{ n }}"
+                                required
+                                {% if weight|stringformat:"s" == n %}checked{% endif %}
+                            >
+                            <label for="w{{ selected.id }}-{{ idx }}-{{ n }}">{{ n }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <div class="eval-actionbar">
+                {% if missing %}
+                <span class="eval-pill is-warn">Faltan {{ missing }} subfactores</span>
+                <span class="eval-actionbar-text">
+                    No puedes avanzar a la ponderación hasta valorarlos todos.
+                </span>
+                {% else %}
+                <span class="eval-pill">Todo valorado</span>
+                <span class="eval-actionbar-text">
+                    Ya puedes continuar a la ponderación.
+                </span>
+                {% endif %}
+
+                {% if prev_id is not None %}
+                <a href="?factor_id={{ prev_id }}#subfactores" class="btn-cancelar">← Atrás</a>
+                {% endif %}
+
+                {% if next_id is not None %}
+                <button type="submit" name="nav" value="next" class="btn-continuar">
+                    Siguiente factor →
+                </button>
+                {% else %}
+                <button type="submit" name="nav" value="save" class="btn-continuar">
+                    Guardar factor
+                </button>
+                {% endif %}
+
+                <button
+                    type="button"
+                    data-go="ponderacion"
+                    class="btn-continuar is-ghost"
+                    {% if missing %}disabled{% endif %}
+                >
+                    Continuar a ponderación
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <div class="eval-banner">
+            <span>No hay factores relevantes con la evaluación actual.</span>
+        </div>
+        {% endif %}
+    </section>
+
+
+    <!-- ========== PASO 3: PONDERACIÓN ========== -->
+    <section
+        class="tab-pane fade {% if tab == 'ponderacion' %}show active{% endif %}"
+        id="ponderacion"
+    >
+        {% if pond_rows %}
+        <div class="eval-pondlayout">
+
+            <div class="eval-card eval-pondcard">
+                <h2 class="eval-cardtitle">Ponderación por factor</h2>
+
+                {% for r in pond_rows %}
+                <div class="eval-bar">
+                    <div class="eval-bar-top">
+                        <span>{{ r.name }}</span>
+                        <strong class="tone-{{ r.tone }}">{{ r.score|floatformat:2 }}</strong>
+                    </div>
+                    <div class="eval-bar-track">
+                        <span style="width: {{ r.pct }}%"></span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <aside class="eval-pondside">
+
+                <div class="eval-ringcard">
+                    <span class="eval-ring-label">Ponderación media</span>
+
+                    <div class="eval-ring" style="--pct: {{ pond_pct }}">
+                        <div class="eval-ring-inner">
+                            <strong>{{ pond_media|floatformat:2 }}</strong>
+                            <small>de {{ escala }}.00</small>
+                        </div>
+                    </div>
+
+                    <span class="eval-level">{{ pond_nivel }}</span>
+                </div>
+
+                <div class="eval-card eval-dimcard">
+                    <h3 class="eval-cardtitle">Por dimensión</h3>
+
+                    {% for d in pond_dim %}
+                    <div class="eval-bar is-small">
+                        <div class="eval-bar-top">
+                            <span>{{ d.name }}</span>
+                            <strong>{{ d.score|floatformat:2 }}</strong>
+                        </div>
+                        <div class="eval-bar-track">
+                            <span style="width: {{ d.pct }}%"></span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </aside>
+        </div>
+        {% else %}
+        <div class="eval-banner">
+            <span>Aún no hay subfactores valorados. Completa el paso 2 para ver la ponderación.</span>
+        </div>
         {% endif %}
 
+        <div class="eval-actionbar">
+            <span class="eval-pill">Evaluación en curso</span>
+            <span class="eval-actionbar-text">
+                El resultado se guarda en el historial desde el paso final.
+            </span>
+
+            <button type="button" data-go="subfactores" class="btn-cancelar">← Atrás</button>
+            <button type="button" data-go="resultados" class="btn-continuar">
+                Ver clasificación FODA →
+            </button>
+        </div>
+    </section>
+
+
+    <!-- ========== PASO 4: FODA Y RECOMENDACIÓN ========== -->
+    <section
+        class="tab-pane fade {% if tab == 'resultados' %}show active{% endif %}"
+        id="resultados"
+    >
+        {% if foda_total %}
+        <div class="eval-fodalayout">
+
+            <div class="eval-fodagrid">
+                {% for g in foda_groups %}
+                <article class="eval-card eval-fodacard">
+                    <header class="eval-fodahead">
+                        <span class="eval-fodaletter {{ g.css }}">{{ g.letter }}</span>
+                        <div>
+                            <h3>{{ g.title }}</h3>
+                            <small>{{ g.count }} factor{{ g.count|pluralize:"es" }}</small>
+                        </div>
+                    </header>
+
+                    <div class="eval-chips">
+                        {% for name in g.names %}
+                        <span class="eval-chip {{ g.css }}">{{ name }}</span>
+                        {% empty %}
+                        <span class="eval-chip is-empty">Sin factores</span>
+                        {% endfor %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            <aside class="eval-recocard">
+                <span class="eval-recopill">Recomendación</span>
+                <h2>{{ reco_title }}</h2>
+                <p>{{ reco_body|default:"Todavía no existen subfactores evaluados." }}</p>
+
+                {% if reco_actions %}
+                <ul class="eval-recolist">
+                    {% for action in reco_actions %}
+                    <li>{{ action }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </aside>
+
+        </div>
+        {% else %}
+        <div class="eval-banner">
+            <span>Aún no hay subfactores valorados. Completa el paso 2 para ver la clasificación.</span>
+        </div>
+        {% endif %}
+
+        <form method="post" class="eval-actionbar">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="recommendation">
+
+            {% if evaluacion and evaluacion.recomendacion %}
+            <span class="eval-pill">Guardado</span>
+            <span class="eval-actionbar-text">
+                Esta evaluación quedó en tu historial con trazabilidad.
+            </span>
+            {% elif missing %}
+            <span class="eval-pill is-warn">Evaluación incompleta</span>
+            <span class="eval-actionbar-text">
+                Faltan {{ missing }} subfactores por valorar.
+            </span>
+            {% else %}
+            <span class="eval-pill">Evaluación completa</span>
+            <span class="eval-actionbar-text">
+                Se guardará en tu historial con trazabilidad.
+            </span>
+            {% endif %}
+
+            <button type="button" data-go="ponderacion" class="btn-cancelar">← Atrás</button>
+
+            {% if informe_url %}
+            <a href="{{ informe_url }}" class="btn-cancelar">Descargar informe</a>
+            {% endif %}
+
+            <button
+                type="submit"
+                class="btn-continuar"
+                {% if not reco_text %}disabled{% endif %}
+            >
+                Guardar en historial →
+            </button>
+        </form>
     </section>
 
 </div>
 
-
-<!-- REINICIAR EVALUACIÓN ORIGINAL -->
-
+<!-- REINICIAR -->
 <form
     method="post"
-    class="mt-4"
+    class="eval-reset"
     onsubmit="return confirm('¿Reiniciar las evaluaciones?')"
 >
     {% csrf_token %}
-
     <input type="hidden" name="action" value="reset">
-
-    <button class="btn btn-outline-secondary btn-sm">
-        Reiniciar evaluación
-    </button>
-
+    <button type="submit">Reiniciar evaluación</button>
 </form>
+
+</div>
+{# fin .eval-root #}
 
 {% endblock %}
 
 
 {% block extra_js %}
-
 <script>
-    const levels = [
-        'Irrelevante',
-        'Opcional',
-        'Importante',
-        'Fundamental'
-    ];
+    /* ---------- Encabezado según el paso ---------- */
+    const stepCopy = {
+        factores: [
+            'Factores relevantes',
+            'Activa los factores que importan a tu organización. Se muestran con su importancia sugerida (IS).'
+        ],
+        subfactores: [
+            'Evaluación de subfactores',
+            'Valora cada subfactor del 1 (no cumple) al 4 (cumple el requisito). Debes completar todos para avanzar.'
+        ],
+        ponderacion: [
+            'Ponderación media',
+            'Resultado por factor con la fórmula validada de GUIOS (escala de 1 a 4).'
+        ],
+        resultados: [
+            'FODA y recomendación',
+            'Cada factor se clasifica según su ponderación y su importancia.'
+        ]
+    };
 
-    const sublevels = [
-        'No cumple el requisito',
-        'Desconozco si cumple requisito',
-        'Cumple parcialmente el requisito',
-        'Cumple el requisito'
-    ];
+    const titleEl = document.getElementById('eval-title');
+    const leadEl = document.getElementById('eval-lead');
+    const steps = [...document.querySelectorAll('.eval-stepper .nav-link')];
 
-    document.querySelectorAll('.rating').forEach(el => {
-        const update = () => {
-            const i = el.dataset.row;
-            const n = Number(el.value);
-            const suggested = Number(el.dataset.suggested);
+    /* Marca con ✓ los pasos anteriores al actual */
+    const markDone = name => {
+        const current = steps.findIndex(
+            step => step.dataset.bsTarget === '#' + name
+        );
 
-            document.getElementById('decisor-label-' + i).textContent =
-                levels[n - 1];
+        steps.forEach((step, i) => {
+            const num = step.querySelector('.eval-step-num');
+            const done = i < current;
 
-            document.getElementById('relative-label-' + i).textContent =
-                levels[Math.floor((suggested - 1 + n - 1) / 2)];
-        };
+            num.classList.toggle('is-done', done);
+            num.textContent = done ? '✓' : String(i + 1);
+        });
+    };
 
-        el.addEventListener('input', update);
-        update();
+    const setHeader = name => {
+        const copy = stepCopy[name];
+
+        if (copy && titleEl && leadEl) {
+            titleEl.textContent = copy[0];
+            leadEl.textContent = copy[1];
+        }
+
+        markDone(name);
+    };
+
+    const activeStep = document.querySelector('.eval-stepper .nav-link.active');
+
+    if (activeStep) {
+        setHeader(activeStep.dataset.bsTarget.slice(1));
+    }
+
+    /* ---------- Paso 1: relevancia en vivo ---------- */
+    const RELEVANT_MIN = 2;
+
+    const updateRelevantCount = () => {
+        const total = document.querySelectorAll('.eval-rel.is-on').length;
+        const pill = document.getElementById('rel-count');
+
+        if (pill) {
+            pill.textContent = total + ' relevantes';
+        }
+    };
+
+    document.querySelectorAll('.eval-frow').forEach(row => {
+        const suggested = Number(row.dataset.suggested);
+        const badge = row.querySelector('.eval-rel');
+
+        row.addEventListener('change', () => {
+            const checked = row.querySelector('input[type="radio"]:checked');
+
+            if (!checked) {
+                return;
+            }
+
+            const n = Number(checked.value);
+            const relative = Math.floor((suggested - 1 + n - 1) / 2);
+            const on = relative >= RELEVANT_MIN;
+
+            badge.classList.toggle('is-on', on);
+            badge.textContent = on ? 'Relevante' : 'No relevante';
+            updateRelevantCount();
+        });
     });
 
-    document.querySelectorAll('.subrating').forEach(el => {
-        const update = () => {
-            document.getElementById(
-                'subresult-' + el.dataset.index
-            ).textContent = sublevels[Number(el.value) - 1];
-        };
+    /* ---------- Paso 1: pestañas por dimensión ---------- */
+    document.querySelectorAll('.eval-dimtab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.eval-dimtab').forEach(other => {
+                other.classList.toggle('active', other === tab);
+            });
 
-        el.addEventListener('input', update);
-        update();
+            document.querySelectorAll('.eval-dimpane').forEach(pane => {
+                pane.classList.toggle('active', pane.id === tab.dataset.dim);
+            });
+        });
     });
 
+    /* ---------- Paso 2: progreso de subfactores ---------- */
+    const subForm = document.getElementById('sub-form');
+
+    if (subForm) {
+        const subRows = subForm.querySelectorAll('.eval-subrow');
+        const bar = document.getElementById('sub-progress');
+        const sideCount = document.querySelector('.eval-sidelink.active .js-side-count');
+
+        const refreshProgress = () => {
+            const total = subRows.length;
+            const done = [...subRows].filter(
+                row => row.querySelector('input[type="radio"]:checked')
+            ).length;
+
+            bar.style.width = (total ? (done / total) * 100 : 0) + '%';
+
+            if (sideCount) {
+                sideCount.textContent = done + '/' + total;
+            }
+        };
+
+        subForm.addEventListener('change', refreshProgress);
+        refreshProgress();
+    }
+
+    /* ---------- Botones "Continuar a ..." y "Atrás" ---------- */
+    document.querySelectorAll('[data-go]').forEach(button => {
+        button.addEventListener('click', () => {
+            const target = document.querySelector(
+                '[data-bs-target="#' + button.dataset.go + '"]'
+            );
+
+            if (target) {
+                bootstrap.Tab.getOrCreateInstance(target).show();
+            }
+        });
+    });
+
+    /* ---------- Pestañas principales y #hash ---------- */
     const fromHash = () => {
         const name = location.hash.slice(1);
-        const target = document.querySelector(
-            '[data-bs-target="#' + name + '"]'
-        );
+        const target = document.querySelector('[data-bs-target="#' + name + '"]');
 
         if (target) {
             bootstrap.Tab.getOrCreateInstance(target).show();
@@ -515,13 +660,11 @@
 
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(button =>
         button.addEventListener('shown.bs.tab', ev => {
-            history.replaceState(
-                null,
-                '',
-                ev.target.dataset.bsTarget
-            );
+            const name = ev.target.dataset.bsTarget;
+
+            history.replaceState(null, '', name);
+            setHeader(name.slice(1));
         })
     );
 </script>
-
 {% endblock %}
