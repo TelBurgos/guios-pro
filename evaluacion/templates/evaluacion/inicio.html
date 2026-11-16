@@ -3,9 +3,59 @@
 
 {% block title %}Evaluación de software | GUIOS PRO{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=13">
+<style>
+    /* Ajustes visuales exclusivos de esta pantalla. */
+    .eval-root .eval-reset {
+        display: flex;
+        justify-content: flex-end;
+        margin: 1rem 0;
+    }
 
-<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=12">
+    /* Botones de acción del paso 1, alineados a la derecha. */
+    .eval-root .eval-factor-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: .65rem;
+        margin-left: auto;
+    }
+
+    .eval-root .eval-factor-actions .btn-cancelar {
+        cursor: pointer;
+    }
+
+    /* El formulario de reinicio está fuera del formulario de factores. */
+    .eval-root #eval-reset-form[hidden] {
+        display: none !important;
+    }
+
+    /* Bloquear visualmente los pasos que aún no están disponibles. */
+    .eval-root .eval-stepper .nav-link:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        color: var(--e-text);
+    }
+
+    .eval-root .eval-stepper .nav-link:disabled .eval-step-num {
+        box-shadow: none;
+    }
+
+    /* La clase .btn-continuar usa display:inline-flex y requiere esta regla. */
+    .eval-root #btn-continuar-factores[hidden] {
+        display: none !important;
+    }
+
+    /* Separar visualmente las dimensiones cuando se muestra "Todos". */
+    .eval-root .eval-dimpane.active + .eval-dimpane.active {
+        border-top: 2px solid var(--e-line);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 
 <div class="eval-root">
 
@@ -97,7 +147,7 @@
             <a href="/importancia-sugerida/" class="btn-continuar">Actualizar con literatura</a>
         </div>
 
-        <form method="post">
+        <form method="post" id="factores-form">
             {% csrf_token %}
             <input type="hidden" name="action" value="factors">
 
@@ -106,6 +156,13 @@
             <div class="eval-card eval-table-card">
 
                 <div class="eval-dimtabs" role="tablist">
+                    <button
+                        type="button"
+                        class="eval-dimtab"
+                        data-dim="all"
+                    >
+                        Todos · {{ rows|length }}
+                    </button>
                     {% for dim in dimensiones %}
                     <button
                         type="button"
@@ -135,7 +192,7 @@
                             </thead>
                             <tbody>
                                 {% for row in dim.list %}
-                                <tr class="eval-frow" data-suggested="{{ row.suggested }}">
+                                <tr class="eval-frow" data-suggested="{{ row.suggested }}" data-factor-id="{{ row.id }}">
                                     <td class="eval-fname">{{ row.name }}</td>
 
                                     <td class="eval-fis">{{ row.suggested }}</td>
@@ -152,7 +209,6 @@
                                                 id="d{{ row.id }}-{{ n }}"
                                                 name="decisor_{{ row.id }}"
                                                 value="{{ n }}"
-                                                {% if row.decisor|stringformat:"s" == n %}checked{% endif %}
                                             >
                                             <label for="d{{ row.id }}-{{ n }}">{{ n }}</label>
                                             {% endfor %}
@@ -199,9 +255,17 @@
                 <span class="eval-actionbar-text">
                     Solo se evaluarán los subfactores de estos factores.
                 </span>
-                <button class="btn-continuar" type="submit">
-                    Continuar a subfactores →
-                </button>
+                <div class="eval-factor-actions">
+                    <!-- En este paso solo aparece Continuar cuando estén los factores valorados. -->
+                    <button
+                        class="btn-continuar"
+                        id="btn-continuar-factores"
+                        type="submit"
+                        hidden
+                    >
+                        Continuar a subfactores →
+                    </button>
+                </div>
             </div>
         </form>
     </section>
@@ -263,7 +327,7 @@
                                 name="weight_{{ selected.id }}_{{ idx }}"
                                 value="{{ n }}"
                                 required
-                                {% if weight|stringformat:"s" == n %}checked{% endif %}
+                                {% if selected.saved and weight|stringformat:"s" == n %}checked{% endif %}
                             >
                             <label for="w{{ selected.id }}-{{ idx }}-{{ n }}">{{ n }}</label>
                             {% endfor %}
@@ -475,27 +539,49 @@
             <a href="{{ informe_url }}" class="btn-cancelar">Descargar informe</a>
             {% endif %}
 
+            <!-- Reiniciar se ofrece únicamente en el paso 4. -->
+            <!-- El atributo form envía el formulario de reinicio, no el de recomendación. -->
             <button
                 type="submit"
-                class="btn-continuar"
-                {% if not reco_text %}disabled{% endif %}
+                form="eval-reset-form"
+                class="btn-cancelar"
             >
-                Guardar en historial →
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                Reiniciar evaluación
             </button>
+
+            {% if evaluacion and evaluacion.recomendacion %}
+
+                <a href="{% url 'evaluacion:historial' %}"
+                class="btn-continuar">
+                    Ver historial →
+                </a>
+
+            {% else %}
+
+                <button
+                    type="submit"
+                    class="btn-continuar"
+                    {% if not reco_text %}disabled{% endif %}
+                >
+                    Guardar en historial →
+                </button>
+
+            {% endif %}
         </form>
     </section>
 
 </div>
 
-<!-- REINICIAR -->
+<!-- Formulario separado: evita anidar un <form> dentro de otro. -->
 <form
+    id="eval-reset-form"
     method="post"
-    class="eval-reset"
-    onsubmit="return confirm('¿Reiniciar las evaluaciones?')"
+    onsubmit="return confirmarReinicioGUIOS()"
+    hidden
 >
     {% csrf_token %}
     <input type="hidden" name="action" value="reset">
-    <button type="submit">Reiniciar evaluación</button>
 </form>
 
 </div>
@@ -603,10 +689,194 @@
             });
 
             document.querySelectorAll('.eval-dimpane').forEach(pane => {
-                pane.classList.toggle('active', pane.id === tab.dataset.dim);
+                pane.classList.toggle(
+                    'active',
+                    tab.dataset.dim === 'all' || pane.id === tab.dataset.dim
+                );
             });
         });
     });
+
+    /* ---------- Paso 1: valoraciones realizadas por el usuario ---------- */
+    const factoresForm = document.getElementById('factores-form');
+    const factorRows = [...document.querySelectorAll('#factores .eval-frow')];
+    const btnContinuarFactores = document.getElementById('btn-continuar-factores');
+
+    // Conservar las selecciones de esta evaluación durante la sesión del navegador.
+    // El cálculo y el guardado del servidor no se modifican.
+    const factorStorageKey =
+        'guiospro-factores-{{ request.user.pk }}-{{ evaluacion.pk|default:"nueva" }}';
+    const paso1EnviadoKey = factorStorageKey + '-enviado';
+    const ponderacionVistaKey = factorStorageKey + '-ponderacion-vista';
+
+    const guardarEnSesion = (clave, valor) => {
+        try { sessionStorage.setItem(clave, valor); } catch (error) { /* Sin almacenamiento */ }
+    };
+    const leerDeSesion = clave => {
+        try { return sessionStorage.getItem(clave); } catch (error) { return null; }
+    };
+    const quitarDeSesion = clave => {
+        try { sessionStorage.removeItem(clave); } catch (error) { /* Sin almacenamiento */ }
+    };
+
+    // El servidor ya proporciona si se guardaron los subfactores; no cambiamos su lógica.
+    const subfactoresGuardados = {% if selected and not missing %}true{% else %}false{% endif %};
+    const hayPonderacion = {% if pond_rows %}true{% else %}false{% endif %};
+    const paginaSinError = {% if error %}false{% else %}true{% endif %};
+    let paso1Enviado = leerDeSesion(paso1EnviadoKey) === '1' ||
+        ('{{ tab|escapejs }}' === 'subfactores' && paginaSinError);
+    let ponderacionVista = leerDeSesion(ponderacionVistaKey) === '1' ||
+        ('{{ tab|escapejs }}' === 'resultados' && paginaSinError);
+
+    let factoresMarcados = {};
+    try {
+        const guardados = JSON.parse(sessionStorage.getItem(factorStorageKey) || '{}');
+        if (guardados && typeof guardados === 'object' && !Array.isArray(guardados)) {
+            factoresMarcados = guardados;
+        }
+    } catch (error) {
+        factoresMarcados = {};
+    }
+
+    /* ---------- Navegación entre pasos ---------- */
+    // MODO REVISIÓN DEL DISEÑO: navegación libre por los cuatro pasos.
+    // Cuando el diseño esté listo, cambia solamente false por true.
+    // La validación secuencial original queda conservada debajo.
+    const BLOQUEAR_PASOS = false;
+
+    const factoresCompletos = () => factorRows.length > 0 && factorRows.every(row =>
+        Boolean(row.querySelector('input[type="radio"]:checked'))
+    );
+
+    const pasoPermitido = nombre => {
+        // Durante la revisión visual, todas las pestañas son navegables.
+        if (!BLOQUEAR_PASOS) return true;
+
+        // BLOQUEO SECUENCIAL (inactivo mientras BLOQUEAR_PASOS sea false).
+        if (nombre === 'factores') return true;
+        const primeroListo = factoresCompletos() && paso1Enviado;
+        if (nombre === 'subfactores') return primeroListo;
+        const segundoListo = primeroListo && subfactoresGuardados && hayPonderacion;
+        if (nombre === 'ponderacion') return segundoListo;
+        if (nombre === 'resultados') return segundoListo && ponderacionVista;
+        return false;
+    };
+
+    const actualizarAccesoPasos = () => {
+        steps.forEach(step => {
+            const nombre = step.dataset.bsTarget.slice(1);
+            const bloqueado = !pasoPermitido(nombre);
+            step.disabled = bloqueado;
+            step.setAttribute('aria-disabled', String(bloqueado));
+            if (bloqueado) {
+                step.title = 'Completa el paso anterior para continuar';
+            } else {
+                step.removeAttribute('title');
+            }
+        });
+    };
+
+    // Solo bloquea pestañas o enlaces con #hash cuando BLOQUEAR_PASOS = true.
+    steps.forEach(step => {
+        step.addEventListener('show.bs.tab', evento => {
+            if (!pasoPermitido(evento.target.dataset.bsTarget.slice(1))) {
+                evento.preventDefault();
+            }
+        });
+    });
+
+    const actualizarProgresoFactores = () => {
+        const total = factorRows.length;
+        const valorados = factorRows.filter(row =>
+            Boolean(row.querySelector('input[type="radio"]:checked'))
+        ).length;
+        const relevantes = factorRows.filter(row =>
+            row.querySelector('.eval-rel')?.classList.contains('is-on')
+        ).length;
+
+        const contador = document.getElementById('rel-count');
+        if (contador) {
+            contador.textContent =
+                relevantes + ' relevantes · ' + valorados + '/' + total + ' valorados';
+        }
+
+        if (btnContinuarFactores) {
+            btnContinuarFactores.hidden = total === 0 || valorados !== total;
+        }
+        actualizarAccesoPasos();
+    };
+
+    factorRows.forEach(row => {
+        const factorId = row.dataset.factorId;
+        const guardado = factoresMarcados[factorId];
+        const opciones = row.querySelectorAll('input[type="radio"]');
+        const estado = row.querySelector('.eval-rel');
+
+        // No seleccionar por defecto ningún número: solamente mostrar los
+        // valores elegidos expresamente en esta pestaña del navegador.
+        opciones.forEach(opcion => {
+            opcion.checked = guardado === opcion.value;
+        });
+
+        if (guardado && row.querySelector('input[type="radio"]:checked')) {
+            // Aplicar el comportamiento de relevancia que ya tenía la pantalla.
+            row.dispatchEvent(new Event('change', { bubbles: true }));
+        } else if (estado) {
+            estado.classList.remove('is-on');
+            estado.textContent = 'Pendiente';
+        }
+
+        row.addEventListener('change', () => {
+            const elegido = row.querySelector('input[type="radio"]:checked');
+            if (elegido) {
+                factoresMarcados[factorId] = elegido.value;
+                try {
+                    sessionStorage.setItem(
+                        factorStorageKey,
+                        JSON.stringify(factoresMarcados)
+                    );
+                } catch (error) {
+                    // Si el navegador bloquea el almacenamiento, el formulario sigue activo.
+                }
+                // Si cambia una valoración, debe volver a confirmar el paso 1.
+                paso1Enviado = false;
+                ponderacionVista = false;
+                quitarDeSesion(paso1EnviadoKey);
+                quitarDeSesion(ponderacionVistaKey);
+            }
+            actualizarProgresoFactores();
+        });
+    });
+
+    if (factoresForm) {
+        factoresForm.addEventListener('submit', event => {
+            const incompleto = factorRows.some(row =>
+                !row.querySelector('input[type="radio"]:checked')
+            );
+            if (incompleto || factorRows.length === 0) {
+                event.preventDefault();
+                actualizarProgresoFactores();
+            } else {
+                // Solo se habilita el paso 2 después de enviar las 18 valoraciones.
+                paso1Enviado = true;
+                ponderacionVista = false;
+                guardarEnSesion(paso1EnviadoKey, '1');
+                quitarDeSesion(ponderacionVistaKey);
+            }
+        });
+    }
+
+    function confirmarReinicioGUIOS() {
+        if (!confirm('¿Reiniciar las evaluaciones?')) {
+            return false;
+        }
+        quitarDeSesion(factorStorageKey);
+        quitarDeSesion(paso1EnviadoKey);
+        quitarDeSesion(ponderacionVistaKey);
+        return true;
+    }
+
+    actualizarProgresoFactores();
 
     /* ---------- Paso 2: progreso de subfactores ---------- */
     const subForm = document.getElementById('sub-form');
@@ -636,11 +906,18 @@
     /* ---------- Botones "Continuar a ..." y "Atrás" ---------- */
     document.querySelectorAll('[data-go]').forEach(button => {
         button.addEventListener('click', () => {
+            const destino = button.dataset.go;
+            // El paso 3 es informativo: se completa pulsando "Ver clasificación FODA".
+            if (destino === 'resultados' && pasoPermitido('ponderacion')) {
+                ponderacionVista = true;
+                guardarEnSesion(ponderacionVistaKey, '1');
+                actualizarAccesoPasos();
+            }
             const target = document.querySelector(
-                '[data-bs-target="#' + button.dataset.go + '"]'
+                '[data-bs-target="#' + destino + '"]'
             );
 
-            if (target) {
+            if (target && pasoPermitido(destino)) {
                 bootstrap.Tab.getOrCreateInstance(target).show();
             }
         });
@@ -651,7 +928,7 @@
         const name = location.hash.slice(1);
         const target = document.querySelector('[data-bs-target="#' + name + '"]');
 
-        if (target) {
+        if (target && pasoPermitido(name)) {
             bootstrap.Tab.getOrCreateInstance(target).show();
         }
     };

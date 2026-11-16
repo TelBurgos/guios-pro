@@ -83,6 +83,7 @@ def inicio(request):
 
     if show_recommendation:
         guardar_resultado(request, rows, state, texto_recomendacion)
+        return redirect("evaluacion:historial")
 
     # ---------- Paso 2: factor seleccionado y navegación ----------
     relevant = [r for r in rows if r["relevant"]]
@@ -240,7 +241,7 @@ def inicio(request):
         except NoReverseMatch:
             informe_url = None
 
-    return render(request, "evaluacion/historial.html", {
+    return render(request, "evaluacion/inicio.html", {
         "rows": rows,
         "relevant": relevant,
         "selected": selected,

@@ -117,11 +117,10 @@
 
                 <!-- Acciones -->
                 <div class="hist-actions">
-                    <a href="{% url 'evaluacion:ver_evaluacion' e.pk %}"class="hist-btn-ver">Ver</a>
+                    <a href="{% url 'evaluacion:ver_evaluacion' e.pk %}" class="hist-btn-ver">Ver</a>
                     <a href="{% url 'evaluacion:exportar_evaluacion' e.pk %}" class="hist-btn">Exportar</a>
                 </div>
-
-
+            </article>
         </div>
 
     {% empty %}

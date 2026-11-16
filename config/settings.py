@@ -23,7 +23,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "guiospro_db",
         "USER": "postgres",
-        "PASSWORD": "kristel",
+        "PASSWORD": "123",
         "HOST": "localhost",
         "PORT": "5432",
     }
