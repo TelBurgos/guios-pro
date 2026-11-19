@@ -13,6 +13,14 @@
             Se calcula con la literatura científica 2020–2025 (OpenAlex)
             combinada con la importancia experta de cada factor.
         </p>
+        <p class="panel-card-note">
+            Términos de búsqueda generados con IA:
+            <strong>{{ ia_con_terminos }} de {{ ia_total }}</strong> subfactores.
+            {% if ia_con_terminos < ia_total %}
+                Los que no tienen términos se consultan con su nombre en español,
+                lo que reduce los resultados.
+            {% endif %}
+        </p>
     </div>
 
     <div class="lit-actions">
@@ -23,12 +31,14 @@
             </a>
         {% endif %}
 
+        {% if puede_actualizar %}
         <form method="post" id="form-actualizar">
             {% csrf_token %}
             <button type="submit" class="btn-continuar" id="btn-actualizar">
                 Actualizar importancia sugerida
             </button>
         </form>
+        {% endif %}
 
     </div>
 
@@ -210,7 +220,9 @@
     });
 
     /* La actualización consulta la API una vez por subfactor: evita dobles clics */
-    document.getElementById('form-actualizar').addEventListener('submit', () => {
+    const formActualizar = document.getElementById('form-actualizar');
+
+    if (formActualizar) formActualizar.addEventListener('submit', () => {
         const btn = document.getElementById('btn-actualizar');
 
         btn.disabled = true;

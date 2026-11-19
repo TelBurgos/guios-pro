@@ -3,9 +3,10 @@ from io import BytesIO
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
-
+from django.utils import timezone
 from .models import ActualizacionIS, ConsultaIS, DetalleActualizacionIS
-
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 def _encabezado(ws, columnas, anchos):
     ws.append(columnas)
@@ -56,22 +57,24 @@ def construir_libro(act):
         fila[3].alignment = Alignment(wrap_text=True, vertical="top")
 
     # Hoja 3: información de la actualización
+    # Hoja 3: información de la actualización
     wi = wb.create_sheet("Actualización")
     _encabezado(wi, ["Dato", "Valor"], [28, 50])
     wi.append(["ID de actualización", act.id])
-    wi.append(["Fecha", act.fecha.strftime("%Y-%m-%d %H:%M")])
+    wi.append(["Fecha", timezone.localtime(act.fecha).strftime("%Y-%m-%d %H:%M")])  # <- cambiado
     wi.append(["Fuente", act.fuente])
     wi.append(["Versión de cálculo", act.version_calculo])
     wi.append(["Total de consultas", consultas.count()])
     wi.append(["Total de factores", detalles.count()])
     return wb
 
-
 def obtener_actualizacion(act_id=None):
     if act_id:
-        return ActualizacionIS.objects.get(pk=act_id)
-    return ActualizacionIS.objects.order_by("-fecha").first()
-
+        return get_object_or_404(ActualizacionIS, pk=act_id)
+    act = ActualizacionIS.objects.order_by("-fecha").first()
+    if act is None:
+        raise Http404("Aún no hay actualizaciones de la IS.")
+    return act
 
 def guardar(act_id=None, ruta=None):
     act = obtener_actualizacion(act_id)

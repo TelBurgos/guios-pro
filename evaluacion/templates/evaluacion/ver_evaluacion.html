@@ -11,7 +11,7 @@
 <header class="eval-head">
     <span class="eval-eyebrow">Resultado · {{ ev.organizacion.nombre }}</span>
     <h1 class="eval-title">{{ ev.software }}</h1>
-    <p class="eval-sub">Evaluación del {{ ev.fecha_creacion|date:"d M Y" }}. Solo lectura.</p>
+    <p class="eval-sub">Evaluación del {{ ev.fecha_creacion|date:"d M Y" }} · {{ ev.get_tipo_display }}.</p>
 </header>
 
 {% if pond_rows %}
@@ -86,9 +86,61 @@
 </div>
 {% endif %}
 
+{# HU-09: oferta de segunda evaluación (el usuario decide si hacerla) #}
+{% if puede_segunda %}
+<div class="eval-banner" style="margin-top:1.1rem">
+    <span>Se detectaron debilidades o amenazas en: {{ a_reevaluar|join:", " }}.
+    Puedes hacer una segunda evaluación solo de esos factores, o dejarla para después.</span>
+    <form method="post" action="{% url 'evaluacion:crear_segunda' ev.pk %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn-continuar">Iniciar segunda evaluación</button>
+    </form>
+</div>
+{% endif %}
+
+{# Comparación primera vs. segunda #}
+{% if comparacion %}
+<div class="eval-card" style="margin-top:1.1rem">
+    <h2 class="eval-cardtitle">Comparación con la primera evaluación</h2>
+    <div class="table-responsive">
+        <table class="eval-ftable">
+            <thead>
+                <tr>
+                    <th>Factor</th>
+                    <th>Primera</th>
+                    <th>FODA</th>
+                    <th>Segunda</th>
+                    <th>FODA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in comparacion %}
+                <tr>
+                    <td class="eval-fname">{{ c.name }}{% if c.reevaluado %} <small>(reevaluado)</small>{% endif %}</td>
+                    <td>{{ c.score_1|floatformat:2 }}</td>
+                    <td>{{ c.foda_1|default:"—" }}</td>
+                    <td>{% if c.score_2 is not None %}{{ c.score_2|floatformat:2 }}{% else %}—{% endif %}</td>
+                    <td>{{ c.foda_2|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <div class="eval-actionbar">
     <span class="eval-actionbar-text"></span>
     <a href="{% url 'evaluacion:historial' %}" class="btn-cancelar">← Volver al historial</a>
+
+    {% if ev.progreso != 'completada' %}
+        <a href="{% url 'evaluacion:abrir_evaluacion' ev.pk %}" class="btn-continuar">Continuar evaluación</a>
+    {% endif %}
+
+    {% if ev.tipo == 'primera' and ev.progreso == 'completada' and segunda %}
+        <a href="{% url 'evaluacion:abrir_evaluacion' segunda.pk %}" class="btn-cancelar">Abrir segunda evaluación</a>
+    {% endif %}
+
     <a href="{% url 'evaluacion:exportar_evaluacion' ev.pk %}" class="btn-continuar">Exportar</a>
 </div>
 

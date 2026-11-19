@@ -9,7 +9,11 @@ from .views import (
     exportar_todo,
     abrir_evaluacion,
     exportar_evaluacion,
-    ver_evaluacion
+    ver_evaluacion,
+    crear_organizacion,
+    crear_segunda,
+    crear_categoria,
+    eliminar_evaluacion,
 )
 
 # Espacio de nombres: se usa como {% url 'evaluacion:...' %}
@@ -42,5 +46,13 @@ urlpatterns = [
     # Descarga en CSV de una sola evaluación
     path("historial/<int:pk>/exportar/", exportar_evaluacion, name="exportar_evaluacion"),
 
-path("historial/<int:pk>/ver/", ver_evaluacion, name="ver_evaluacion"),
+    path("historial/<int:pk>/ver/", ver_evaluacion, name="ver_evaluacion"),
+
+
+    path("evaluacion/<int:pk>/segunda/", crear_segunda, name="crear_segunda"),
+    path("organizacion/nueva/", crear_organizacion, name="crear_organizacion"),
+    path("categoria/nueva/", crear_categoria, name="crear_categoria"),
+
+path("evaluacion/<int:pk>/eliminar/", eliminar_evaluacion, name="eliminar_evaluacion"),
+
 ]

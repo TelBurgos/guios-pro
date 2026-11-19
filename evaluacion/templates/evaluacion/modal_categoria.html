@@ -1,0 +1,33 @@
+{# Modal: registrar categoría. Incluir FUERA del <form> de la evaluación. #}
+<div class="modal fade org-modal" id="modalCategoria" tabindex="-1"
+     aria-labelledby="modalCategoriaTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post" action="{% url 'evaluacion:crear_categoria' %}">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h2 class="form-section-title mb-0" id="modalCategoriaTitulo">
+                        <span class="form-step">+</span>
+                        Nueva categoría
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-field mb-0">
+                        <label for="cat_nombre">Nombre de la categoría</label>
+                        {{ cat_form.nombre }}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-continuar">Guardar categoría</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

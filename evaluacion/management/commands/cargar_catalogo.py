@@ -84,7 +84,9 @@ class Command(BaseCommand):
                     factor=f,
                     total_articulos=0,
                     promedio_r=0,
-                    importancia_literaria=0,  # 0 = no aplica en la IS base
+                    # La restricción exige 1-4: sin literatura aún, se usa
+                    # el valor base de la tesis.
+                    importancia_literaria=f.importancia_is,
                     importancia_experta=f.importancia_experta,
                     importancia_sugerida=f.importancia_is,
                 )

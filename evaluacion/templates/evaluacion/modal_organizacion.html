@@ -1,0 +1,45 @@
+{# Modal HU-02: registrar organización. Incluir FUERA del <form> de la evaluación (los formularios no se anidan). #}
+<div class="modal fade org-modal" id="modalOrganizacion" tabindex="-1"
+     aria-labelledby="modalOrganizacionTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post" action="{% url 'evaluacion:crear_organizacion' %}">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h2 class="form-section-title mb-0" id="modalOrganizacionTitulo">
+                        <span class="form-step">+</span>
+                        Nueva organización
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-field">
+                        <label for="org_nombre">Nombre</label>
+                        {{ org_form.nombre }}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="org_tipo">Tipo</label>
+                        {{ org_form.tipo }}
+                    </div>
+
+                    <div class="form-field mb-0">
+                        <label for="org_descripcion">
+                            Descripción <span class="optional-label">(opcional)</span>
+                        </label>
+                        {{ org_form.descripcion }}
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-continuar">Guardar organización</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

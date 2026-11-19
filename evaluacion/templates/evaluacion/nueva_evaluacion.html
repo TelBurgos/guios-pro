@@ -4,6 +4,49 @@
 
 {% block content %}
 
+{# Estilos del botón "+" junto al select (van aquí para no depender de la caché del CSS) #}
+<style>
+    .field-add {
+        display: flex;
+        align-items: stretch;
+        gap: .5rem;
+    }
+
+    .form-field .field-add select {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+    }
+
+    .add-btn {
+        flex: 0 0 auto;
+        width: 44px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 1px dashed var(--g-purple, #7b2fb5);
+        border-radius: 10px;
+        background: transparent;
+        color: var(--g-purple-dark, #5a1f8a);
+        font-size: 1.05rem;
+        line-height: 1;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: background .15s, border-color .15s, color .15s;
+    }
+
+    .add-btn:hover {
+        border-style: solid;
+        background: var(--g-lilac, #ece3f7);
+    }
+
+    .add-btn:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+    }
+</style>
+
 <form method="post" action="{% url 'evaluacion:nueva_evaluacion' %}" class="nueva-form">
     {% csrf_token %}
 
@@ -70,56 +113,23 @@
                     Datos de la organización
                 </h2>
 
-                {% if form.organizacion_existente %}
+                <div class="form-field">
+                    <label for="{{ form.organizacion.id_for_label }}">
+                        Organización
+                    </label>
 
-                    <div class="form-field">
-                        <label for="{{ form.organizacion_existente.id_for_label }}">
-                            Organización existente
-                        </label>
-                        {{ form.organizacion_existente }}
-                        {% for e in form.organizacion_existente.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-                    </div>
-
-                    <div class="row g-3">
-
-                        {% if form.organizacion_nueva %}
-                            <div class="col-md-6">
-                                <div class="form-field">
-                                    <label for="{{ form.organizacion_nueva.id_for_label }}">
-                                        O registrar nueva
-                                    </label>
-                                    {{ form.organizacion_nueva }}
-                                    {% for e in form.organizacion_nueva.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-
-                        {% if form.sector %}
-                            <div class="col-md-6">
-                                <div class="form-field">
-                                    <label for="{{ form.sector.id_for_label }}">
-                                        Sector
-                                    </label>
-                                    {{ form.sector }}
-                                    {% for e in form.sector.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
-                                </div>
-                            </div>
-                        {% endif %}
-
-                    </div>
-
-                {% else %}
-
-                    <!-- Formulario actual: un solo campo de organización -->
-                    <div class="form-field">
-                        <label for="{{ form.organizacion.id_for_label }}">
-                            Organización
-                        </label>
+                    <div class="field-add">
                         {{ form.organizacion }}
-                        {% for e in form.organizacion.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                        {# HU-02: abre el modal para registrar una organización nueva #}
+                        <button type="button" class="add-btn" data-bs-toggle="modal"
+                                data-bs-target="#modalOrganizacion"
+                                title="Nueva organización" aria-label="Nueva organización">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
                     </div>
 
-                {% endif %}
+                    {% for e in form.organizacion.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                </div>
 
                 <hr class="form-divider">
 
@@ -146,7 +156,17 @@
                             <label for="{{ form.categoria.id_for_label }}">
                                 Categoría
                             </label>
-                            {{ form.categoria }}
+
+                            <div class="field-add">
+                                {{ form.categoria }}
+                                {# Abre el modal para registrar una categoría nueva #}
+                                <button type="button" class="add-btn" data-bs-toggle="modal"
+                                        data-bs-target="#modalCategoria"
+                                        title="Nueva categoría" aria-label="Nueva categoría">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+
                             {% for e in form.categoria.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
                         </div>
                     </div>
@@ -155,8 +175,7 @@
 
                 <div class="form-field">
                     <label for="{{ form.descripcion.id_for_label }}">
-                        Descripción
-                        
+                        Descripción <span class="optional-label">(opcional)</span>
                     </label>
                     {{ form.descripcion }}
                     {% for e in form.descripcion.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
@@ -184,4 +203,18 @@
 
 </form>
 
+{# Los modales van FUERA del formulario de la evaluación: los formularios no se anidan #}
+{% include "evaluacion/modal_organizacion.html" %}
+{% include "evaluacion/modal_categoria.html" %}
+
+{% endblock %}
+
+
+{% block extra_js %}
+{# Si el usuario aún no tiene organizaciones, abre el modal automáticamente #}
+{% if not form.organizacion.field.queryset.exists %}
+<script>
+    new bootstrap.Modal(document.getElementById('modalOrganizacion')).show();
+</script>
+{% endif %}
 {% endblock %}

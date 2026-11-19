@@ -249,10 +249,25 @@
     font-weight: 700;
 }
 
-.res-a    { background: #d9f3e6; color: #1b7a4b; }
-.res-b    { background: #fdebc8; color: #9a5b00; }
-.res-c    { background: #fde0e0; color: #b3261e; }
-.res-none { background: var(--g-lilac); color: var(--g-text); }
+.res-a {
+    background: #d9f3e6;
+    color: #1b7a4b;
+}
+
+.res-b {
+    background: #fdebc8;
+    color: #9a5b00;
+}
+
+.res-c {
+    background: #fde0e0;
+    color: #b3261e;
+}
+
+.res-none {
+    background: var(--g-lilac);
+    color: var(--g-text);
+}
 
 /* ---------- Conteo FODA: número arriba, letra abajo ---------- */
 .hist-foda {
@@ -283,26 +298,64 @@
     opacity: .75;
 }
 
-.foda-count.f { background: #d9f3e6; color: #1b7a4b; }
-.foda-count.o { background: #dde8fb; color: #2a57b5; }
-.foda-count.d { background: #fdebc8; color: #9a5b00; }
-.foda-count.a { background: #fde0e0; color: #b3261e; }
-
-/* ---------- Botones "Ver" y "Exportar" ---------- */
-.hist-actions {
-    display: flex;
-    gap: .45rem;
+.foda-count.f {
+    background: #d9f3e6;
+    color: #1b7a4b;
 }
 
-.hist-btn {
-    padding: .5rem 1rem;
-    border: 1px solid var(--g-line);
+.foda-count.o {
+    background: #dde8fb;
+    color: #2a57b5;
+}
+
+.foda-count.d {
+    background: #fdebc8;
+    color: #9a5b00;
+}
+
+.foda-count.a {
+    background: #fde0e0;
+    color: #b3261e;
+}
+
+/* ---------- Acciones: Continuar / Ver / Exportar / Eliminar ---------- */
+.hist-actions {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    flex-wrap: wrap;
+}
+
+/* Base compartida: mismo alto, icono + texto alineados */
+.hist-btn,
+.hist-btn-ver {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    height: 34px;
+    padding: 0 .95rem;
+    border: 1px solid transparent;
     border-radius: 10px;
-    background: var(--g-card);
-    color: var(--g-ink);
     font-size: .74rem;
     font-weight: 700;
+    line-height: 1;
     text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.hist-btn i,
+.hist-btn-ver i {
+    font-size: .85rem;
+}
+
+/* "Exportar": secundario con borde */
+.hist-btn {
+    border-color: var(--g-line);
+    background: var(--g-card);
+    color: var(--g-ink);
 }
 
 .hist-btn:hover {
@@ -310,17 +363,155 @@
     color: var(--g-purple-dark);
 }
 
-/* "Ver" resaltado en lila */
+/* "Ver" y "Continuar": resaltados en lila */
 .hist-btn-ver {
-    border-color: transparent;
     background: var(--g-lilac);
     color: var(--g-purple-dark);
+}
+
+.hist-btn-ver:hover {
+    border-color: var(--g-purple);
+    color: var(--g-purple-dark);
+}
+
+/* "Eliminar": solo icono, en rojo */
+.hist-btn-eliminar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid rgba(220, 53, 69, .4);
+    border-radius: 10px;
+    background: transparent;
+    color: #dc3545;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+}
+
+.hist-btn-eliminar:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* ---------- Modal de confirmación para eliminar ---------- */
+.hist-modal {
+    width: min(420px, calc(100% - 2rem));
+    padding: 0;
+    border: 1px solid var(--g-line);
+    border-radius: 20px;
+    background: var(--g-card);
+    color: var(--g-ink);
+    box-shadow: 0 24px 60px rgba(20, 0, 40, .35);
+}
+
+.hist-modal::backdrop {
+    background: rgba(15, 5, 30, .55);
+    backdrop-filter: blur(3px);
+}
+
+.hist-modal[open] {
+    animation: hist-modal-in .18s ease;
+}
+
+@keyframes hist-modal-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.hist-modal-box {
+    margin: 0;
+    padding: 1.8rem 1.6rem 1.4rem;
+    text-align: center;
+}
+
+/* Icono circular rojo */
+.hist-modal-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: .9rem;
+    border-radius: 50%;
+    background: #fde0e0;
+    color: #b3261e;
+    font-size: 1.4rem;
+}
+
+.hist-modal-box h2 {
+    margin: 0 0 .5rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--g-ink);
+}
+
+.hist-modal-box p {
+    margin: 0 0 1.4rem;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--g-text);
+}
+
+.hist-modal-box p b {
+    color: var(--g-ink);
+}
+
+.hist-modal-actions {
+    display: flex;
+    gap: .6rem;
+}
+
+.hist-modal-cancel,
+.hist-modal-confirm {
+    flex: 1;
+    height: 40px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, filter .15s ease;
+}
+
+.hist-modal-cancel {
+    border-color: var(--g-line);
+    background: var(--g-card);
+    color: var(--g-ink);
+}
+
+.hist-modal-cancel:hover {
+    background: var(--g-lilac);
+    color: var(--g-purple-dark);
+}
+
+.hist-modal-confirm {
+    background: #dc3545;
+    color: #fff;
+}
+
+.hist-modal-confirm:hover {
+    filter: brightness(1.1);
 }
 
 /* ---------- Adaptación a pantallas pequeñas ---------- */
 @media (max-width: 991.98px) {
     .hist-card {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .hist-actions {
+        grid-column: 1 / -1;
     }
 }
 

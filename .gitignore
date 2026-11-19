@@ -4,3 +4,7 @@ venv/
 __pycache__/
 *.pyc
 staticfiles/
+.neon
+node_modules/
+neon.ts
+respaldo.dump

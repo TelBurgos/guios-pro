@@ -1,32 +1,56 @@
-
 from pathlib import Path
 import os
+
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+
 # CONFIGURACIÓN GENERAL
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "development-only-insecure-key-change-me"
-)
+_CLAVE_DESARROLLO = "development-only-insecure-key-change-me"
+
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", _CLAVE_DESARROLLO)
 
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# En producción no se permite la clave de desarrollo
+if not DEBUG and SECRET_KEY == _CLAVE_DESARROLLO:
+    raise ImproperlyConfigured(
+        "Defina DJANGO_SECRET_KEY en el .env antes de usar DEBUG=False."
+    )
+
+# Hosts permitidos: por defecto local; se pueden añadir más desde el .env
+# (ejemplo: DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,miapp.onrender.com)
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
 
 
-# BASE DE DATOS POSTGRESQL
+# BASE DE DATOS (Neon, PostgreSQL en la nube)
+# DB_DIRECTA=1 usa la conexión directa (para migrate y loaddata)
+_clave_url = (
+    "DATABASE_URL_UNPOOLED"
+    if os.getenv("DB_DIRECTA") == "1"
+    else "DATABASE_URL"
+)
+_url = os.getenv(_clave_url)
+
+if not _url:
+    raise ImproperlyConfigured(
+        f"Falta {_clave_url}. Copie .env.example a .env y complete las credenciales."
+    )
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "guiospro_db",
-        "USER": "postgres",
-        "PASSWORD": "123",
-        "HOST": "localhost",
-        "PORT": "5432",
-    }
+    "default": dj_database_url.parse(
+        _url,
+        conn_max_age=0,
+        disable_server_side_cursors=True,
+    )
 }
 
 
@@ -88,7 +112,11 @@ TEMPLATES = [
 
 # ARCHIVOS ESTÁTICOS
 STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Solo se registra la carpeta si existe (Git no sube carpetas vacías)
+STATICFILES_DIRS = [
+    ruta for ruta in [BASE_DIR / "static"] if ruta.exists()
+]
 
 
 # CONFIGURACIÓN DE DJANGO
@@ -138,6 +166,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_SIGNUP_FORM_CLASS = (
     "evaluacion.allauth_forms.RegistroAdicionalForm"
 )
+
 
 # CORREO LOCAL (SIN BREVO)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

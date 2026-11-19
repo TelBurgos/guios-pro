@@ -144,7 +144,7 @@
                 </strong>
                 <span>IS = literatura (IL) combinada con criterio experto (E), 2020–2025.</span>
             </div>
-            <a href="/importancia-sugerida/" class="btn-continuar">Actualizar con literatura</a>
+            <a href="{% url 'importancia_sugerida:literatura' %}" class="btn-continuar">Actualizar con literatura</a>
         </div>
 
         <form method="post" id="factores-form">
@@ -209,6 +209,7 @@
                                                 id="d{{ row.id }}-{{ n }}"
                                                 name="decisor_{{ row.id }}"
                                                 value="{{ n }}"
+                                                {% if evaluacion.paso_actual > 1 and row.decisor|stringformat:"s" == n %}checked{% endif %}
                                             >
                                             <label for="d{{ row.id }}-{{ n }}">{{ n }}</label>
                                             {% endfor %}
@@ -649,7 +650,7 @@
     }
 
     /* ---------- Paso 1: relevancia en vivo ---------- */
-    const RELEVANT_MIN = 2;
+    const RELEVANT_MIN = 1; // igual que el servidor: relevante si la importancia relativa supera "Irrelevante"
 
     const updateRelevantCount = () => {
         const total = document.querySelectorAll('.eval-rel.is-on').length;
@@ -815,10 +816,10 @@
         // No seleccionar por defecto ningún número: solamente mostrar los
         // valores elegidos expresamente en esta pestaña del navegador.
         opciones.forEach(opcion => {
-            opcion.checked = guardado === opcion.value;
+            opcion.checked = guardado ? guardado === opcion.value : opcion.defaultChecked;
         });
 
-        if (guardado && row.querySelector('input[type="radio"]:checked')) {
+        if (row.querySelector('input[type="radio"]:checked')) {
             // Aplicar el comportamiento de relevancia que ya tenía la pantalla.
             row.dispatchEvent(new Event('change', { bubbles: true }));
         } else if (estado) {

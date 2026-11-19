@@ -5,7 +5,7 @@
 
 {# CSS propio del historial (evaluacion/static/evaluacion/historial.css) #}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'evaluacion/historial.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'evaluacion/historial.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
@@ -29,6 +29,15 @@
     </div>
 </div>
 
+<!-- MENSAJES -->
+{% if messages %}
+    {% for m in messages %}
+        <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags|default:'info' }}{% endif %}" role="alert">
+            {{ m }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 <!-- FILTROS -->
 <form method="get" class="hist-filters">
 
@@ -47,7 +56,7 @@
     <select name="resultado" onchange="this.form.submit()">
         <option value="">Todos los resultados</option>
         <option value="A" {% if resultado == 'A' %}selected{% endif %}>Adopción recomendada</option>
-        <option value="B" {% if resultado == 'B' %}selected{% endif %}>Adopción con reservas</option>
+        <option value="B" {% if resultado == 'B' %}selected{% endif %}>Adopción con plan de mitigación</option>
         <option value="C" {% if resultado == 'C' %}selected{% endif %}>Adopción no recomendada</option>
         <option value="pendiente" {% if resultado == 'pendiente' %}selected{% endif %}>Sin resultado</option>
     </select>
@@ -96,7 +105,7 @@
                 <!-- Software y organización -->
                 <div class="hist-main">
                     <h3>{{ e.software }}</h3>
-                    <small>{{ e.organizacion.nombre }}</small>
+                    <small>{{ e.organizacion.nombre }} · {{ e.get_tipo_display }}</small>
                 </div>
 
                 <!-- Resultado y ponderación media -->
@@ -117,8 +126,37 @@
 
                 <!-- Acciones -->
                 <div class="hist-actions">
-                    <a href="{% url 'evaluacion:ver_evaluacion' e.pk %}" class="hist-btn-ver">Ver</a>
-                    <a href="{% url 'evaluacion:exportar_evaluacion' e.pk %}" class="hist-btn">Exportar</a>
+
+                    {% if e.progreso != 'completada' %}
+                        <a href="{% url 'evaluacion:abrir_evaluacion' e.pk %}" class="hist-btn-ver">
+                            <i class="bi bi-play-fill"></i>
+                            <span>Continuar</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'evaluacion:ver_evaluacion' e.pk %}" class="hist-btn-ver">
+                        <i class="bi bi-eye"></i>
+                        <span>Ver</span>
+                    </a>
+
+                    <a href="{% url 'evaluacion:exportar_evaluacion' e.pk %}" class="hist-btn">
+                        <i class="bi bi-download"></i>
+                        <span>Exportar</span>
+                    </a>
+
+                    <!-- Eliminar: abre el modal de confirmación -->
+                    <button
+                        type="button"
+                        class="hist-btn-eliminar"
+                        data-eliminar
+                        data-url="{% url 'evaluacion:eliminar_evaluacion' e.pk %}"
+                        data-nombre="{{ e.software }}"
+                        title="Eliminar evaluación"
+                        aria-label="Eliminar evaluación de {{ e.software }}"
+                    >
+                        <i class="bi bi-trash"></i>
+                    </button>
+
                 </div>
             </article>
         </div>
@@ -138,5 +176,63 @@
     {% endfor %}
 
 </div>
+
+<!-- MODAL DE CONFIRMACIÓN PARA ELIMINAR -->
+<dialog id="modalEliminar" class="hist-modal" aria-labelledby="modalEliminarTitulo">
+    <form method="post" id="formEliminar" class="hist-modal-box">
+        {% csrf_token %}
+
+        <div class="hist-modal-icon">
+            <i class="bi bi-trash"></i>
+        </div>
+
+        <h2 id="modalEliminarTitulo">Eliminar evaluación</h2>
+
+        <p>
+            ¿Seguro que quieres eliminar la evaluación de
+            <b id="modalEliminarNombre"></b>?
+            Esta acción no se puede deshacer.
+        </p>
+
+        <div class="hist-modal-actions">
+            <button type="button" class="hist-modal-cancel" data-cerrar>Cancelar</button>
+            <button type="submit" class="hist-modal-confirm">Sí, eliminar</button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+(function () {
+    var modal = document.getElementById("modalEliminar");
+    var form = document.getElementById("formEliminar");
+    var nombre = document.getElementById("modalEliminarNombre");
+
+    // Evita enviar dos veces el formulario
+    form.addEventListener("submit", function () {
+        form.querySelector(".hist-modal-confirm").disabled = true;
+    });
+
+    // Abrir el modal con los datos de la evaluación pulsada
+    document.querySelectorAll("[data-eliminar]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            form.action = btn.dataset.url;
+            nombre.textContent = btn.dataset.nombre;
+            modal.showModal();
+        });
+    });
+
+    // Cerrar con el botón Cancelar
+    modal.querySelector("[data-cerrar]").addEventListener("click", function () {
+        modal.close();
+    });
+
+    // Cerrar al hacer clic fuera de la caja
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+            modal.close();
+        }
+    });
+})();
+</script>
 
 {% endblock %}

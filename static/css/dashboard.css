@@ -1076,3 +1076,66 @@
         width: 100%;
     }
 }
+
+/* ---------- Modal de organización ---------- */
+.org-modal .modal-content {
+    border: 0;
+    border-radius: 22px;
+    background: var(--g-card);
+    box-shadow: var(--g-shadow);
+}
+
+.org-modal .modal-header,
+.org-modal .modal-footer {
+    padding: 1.2rem 1.5rem;
+    border: 0;
+}
+
+.org-modal .modal-body {
+    padding: .2rem 1.5rem 1rem;
+}
+
+.org-modal .modal-footer {
+    gap: .7rem;
+}
+
+.org-add {
+    margin-top: .5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--g-purple);
+}
+
+.org-add:hover {
+    color: var(--g-purple-dark);
+    text-decoration: underline;
+}
+
+.add-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    margin-top: .55rem;
+    padding: .4rem .9rem;
+    border: 1px dashed var(--g-purple);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--g-purple-dark);
+    font-size: .75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.add-link:hover {
+    background: var(--g-lilac);
+    border-style: solid;
+}
+
+.add-link:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+}
