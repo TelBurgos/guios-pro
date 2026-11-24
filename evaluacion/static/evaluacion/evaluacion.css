@@ -1,12 +1,12 @@
 .eval-root {
     --e-card: var(--g-card, #ffffff);
-    --e-ink: var(--g-ink, #1e1233);
-    --e-text: var(--g-text, #6b6480);
-    --e-line: var(--g-line, #e7e0f2);
-    --e-lilac: var(--g-lilac, #ece3f8);
-    --e-purple: var(--g-purple, #7b2fb5);
-    --e-purple-dark: var(--g-purple-dark, #4b1f86);
-    --e-shadow: var(--g-shadow, 0 14px 34px rgba(74, 28, 128, .12));
+    --e-ink: var(--g-ink, #0f172a);
+    --e-text: var(--g-text, #64748b);
+    --e-line: var(--g-line, #e2e8f0);
+    --e-lilac: var(--g-lilac, #e0e7ff);
+    --e-purple: var(--g-purple, #4338ca);
+    --e-purple-dark: var(--g-purple-dark, #312e81);
+    --e-shadow: var(--g-shadow, 0 14px 34px rgba(49, 46, 129, .12));
 }
 
 /* ---------- Encabezado y avisos ---------- */
@@ -135,9 +135,9 @@
 }
 
 .eval-root .eval-stepper .nav-link.active .eval-step-num {
-    background: linear-gradient(180deg, #9b4fd6, #6d2aa6);
+    background: linear-gradient(180deg, #6366f1, #4338ca);
     color: #ffffff;
-    box-shadow: 0 6px 14px rgba(109, 42, 166, .3);
+    box-shadow: 0 6px 14px rgba(67, 56, 202, .3);
 }
 
 /* ---------- Base compartida ---------- */
@@ -190,13 +190,13 @@
 
 .eval-root .eval-seg input[type="radio"]:checked + label {
     border-color: transparent;
-    background: linear-gradient(180deg, #9b4fd6, #6d2aa6);
+    background: linear-gradient(180deg, #6366f1, #4338ca);
     color: #ffffff;
-    box-shadow: 0 6px 14px rgba(109, 42, 166, .3);
+    box-shadow: 0 6px 14px rgba(67, 56, 202, .3);
 }
 
 .eval-root .eval-seg input[type="radio"]:focus-visible + label {
-    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .25);
+    box-shadow: 0 0 0 .2rem rgba(67, 56, 202, .25);
 }
 
 /* Select y alcance */
@@ -212,7 +212,7 @@
 .eval-root .eval-select:focus {
     outline: 0;
     border-color: var(--e-purple);
-    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+    box-shadow: 0 0 0 .2rem rgba(67, 56, 202, .18);
 }
 
 .eval-root .eval-scope {
@@ -237,8 +237,8 @@
     font-weight: 700;
     text-decoration: none;
     color: #ffffff;
-    background: linear-gradient(180deg, #9b4fd6, #6d2aa6);
-    box-shadow: 0 8px 18px rgba(109, 42, 166, .35);
+    background: linear-gradient(180deg, #6366f1, #4338ca);
+    box-shadow: 0 8px 18px rgba(67, 56, 202, .35);
 }
 
 .eval-root .btn-continuar:hover {
@@ -323,7 +323,7 @@
     margin-bottom: 1.2rem;
     padding: 1rem 1.4rem;
     border-radius: 18px;
-    background: linear-gradient(90deg, rgba(155, 79, 214, .2), rgba(155, 79, 214, .08));
+    background: linear-gradient(90deg, rgba(99, 102, 241, .2), rgba(99, 102, 241, .08));
 }
 
 .eval-root .eval-isbar strong {
@@ -407,7 +407,7 @@
 }
 
 .eval-root .eval-ftable tbody tr:hover td {
-    background: rgba(123, 47, 181, .04);
+    background: rgba(67, 56, 202, .04);
 }
 
 .eval-root .eval-ftable .eval-seg label {
@@ -504,7 +504,7 @@
 }
 
 .eval-root .eval-sidelink:hover {
-    background: rgba(123, 47, 181, .06);
+    background: rgba(67, 56, 202, .06);
 }
 
 .eval-root .eval-sidelink.active {
@@ -563,7 +563,7 @@
     width: 0;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #6d2aa6, #9b4fd6);
+    background: linear-gradient(90deg, #4338ca, #6366f1);
     transition: width .25s;
 }
 
@@ -666,7 +666,7 @@
     display: block;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #4b1f86, #7b2fb5);
+    background: linear-gradient(90deg, #312e81, #4338ca);
 }
 
 .eval-root .eval-pondside {
@@ -680,8 +680,8 @@
     padding: 1.5rem;
     border-radius: 22px;
     color: #ffffff;
-    background: linear-gradient(160deg, #8a2fb8 0%, #4b1f86 50%, #2a1b66 100%);
-    box-shadow: 0 24px 50px rgba(74, 28, 128, .35);
+    background: linear-gradient(160deg, #6366f1 0%, #312e81 50%, #1e1b4b 100%);
+    box-shadow: 0 24px 50px rgba(49, 46, 129, .35);
 }
 
 .eval-root .eval-ring-label {
@@ -857,8 +857,8 @@
     padding: 1.6rem;
     border-radius: 22px;
     color: #ffffff;
-    background: linear-gradient(160deg, #8a2fb8 0%, #4b1f86 50%, #2a1b66 100%);
-    box-shadow: 0 24px 50px rgba(74, 28, 128, .35);
+    background: linear-gradient(160deg, #6366f1 0%, #312e81 50%, #1e1b4b 100%);
+    box-shadow: 0 24px 50px rgba(49, 46, 129, .35);
 }
 
 .eval-root .eval-recopill {
@@ -1025,4 +1025,3 @@
         justify-content: center;
     }
 }
-

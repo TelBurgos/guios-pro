@@ -33,24 +33,14 @@ class OrganizacionForm(forms.ModelForm):
 
     class Meta:
         model = Organizacion
-        fields = ["nombre", "tipo", "descripcion"]
+        fields = ["nombre"]
         widgets = {
             "nombre": forms.TextInput(attrs={
                 "class": "form-control evaluation-input",
                 "id": "org_nombre",
                 "placeholder": "Ej. Municipio de Milagro",
             }),
-            "tipo": forms.TextInput(attrs={
-                "class": "form-control evaluation-input",
-                "id": "org_tipo",
-                "placeholder": "Ej. Pública, Educativa, Comercial",
-            }),
-            "descripcion": forms.Textarea(attrs={
-                "class": "form-control evaluation-input",
-                "id": "org_descripcion",
-                "rows": 3,
-                "placeholder": "Descripción (opcional)",
-            }),
+
         }
 
     def __init__(self, *args, user=None, **kwargs):

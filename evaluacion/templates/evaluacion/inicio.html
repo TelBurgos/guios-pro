@@ -4,7 +4,7 @@
 {% block title %}Evaluación de software | GUIOS PRO{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=13">
+<link rel="stylesheet" href="{% static 'evaluacion/evaluacion.css' %}?v=14">
 <style>
     /* Ajustes visuales exclusivos de esta pantalla. */
     .eval-root .eval-reset {
@@ -51,6 +51,229 @@
     /* Separar visualmente las dimensiones cuando se muestra "Todos". */
     .eval-root .eval-dimpane.active + .eval-dimpane.active {
         border-top: 2px solid var(--e-line);
+    }
+
+    /* ===== PASO 4: matriz FODA con anillo central ===== */
+    .eval-root .eval-fodalayout {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .eval-root .eval-fodagrid {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(2, minmax(240px, 1fr));
+        gap: 6px;
+        background: #fff;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    /* Cuadrantes */
+    .eval-root .eval-fodagrid .foda-q {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: .9rem;
+        padding: 1.75rem 2rem;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        min-width: 0;
+    }
+
+    /* Posición fija por letra (no depende del orden de foda_groups) */
+    .eval-root .foda-q-f { grid-column: 1; grid-row: 1; background: #d0e4f2; color: #1280c4; }
+    .eval-root .foda-q-d { grid-column: 2; grid-row: 1; background: #eaeee4; color: #bd8a28; text-align: right; }
+    .eval-root .foda-q-o { grid-column: 1; grid-row: 2; background: #cce9e0; color: #009a74; }
+    .eval-root .foda-q-a { grid-column: 2; grid-row: 2; background: #fbe4e3; color: #e66b70; text-align: right; }
+
+    /* Encabezado: icono + título con sombra */
+    .eval-root .foda-q .eval-fodahead {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+
+    /* Debilidades y Amenazas: icono a la derecha del título */
+    .eval-root .foda-q-d .eval-fodahead,
+    .eval-root .foda-q-a .eval-fodahead {
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+    }
+
+    .eval-root .foda-q-d .eval-fodahead > div,
+    .eval-root .foda-q-a .eval-fodahead > div {
+        text-align: right;
+    }
+
+    .eval-root .foda-q .eval-fodahead h3 {
+        margin: 0;
+        font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+        font-weight: 800;
+        color: inherit;
+        text-shadow: 2px 2px 0 rgba(0, 0, 0, .14);
+    }
+
+    .eval-root .foda-q .eval-fodahead small {
+        color: inherit;
+        opacity: .8;
+        font-weight: 600;
+    }
+
+    .eval-root .foda-q .foda-q-ico {
+        font-size: 2.4rem;
+        line-height: 1;
+        color: inherit;
+        flex: none;
+    }
+
+    /* Lista de factores con viñetas, alineada a la izquierda */
+    .eval-root .foda-q .eval-chips {
+        display: block;
+        text-align: left;
+        max-width: 60%;
+    }
+
+    /* Cuadrantes de la derecha: la lista arranca pasado el anillo central */
+    .eval-root .foda-q-d .eval-chips,
+    .eval-root .foda-q-a .eval-chips {
+        margin-left: 36%;
+        max-width: 60%;
+    }
+
+    .eval-root .foda-q .eval-chip {
+        display: list-item;
+        list-style: disc;
+        margin: 0 0 .3rem 1.1rem;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        border-radius: 0;
+        color: inherit;
+        font-size: .98rem;
+        font-weight: 500;
+        line-height: 1.35;
+    }
+
+    .eval-root .foda-q .eval-chip.is-empty {
+        list-style: none;
+        margin-left: 0;
+        opacity: .6;
+        font-style: italic;
+    }
+
+    /* Anillo central */
+    .eval-root .foda-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: clamp(190px, 34%, 320px);
+        aspect-ratio: 1;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        background: conic-gradient(
+            #bd8a28 0 90deg,
+            #e66b70 90deg 180deg,
+            #009a74 180deg 270deg,
+            #1280c4 270deg 360deg
+        );
+        display: grid;
+        place-items: center;
+        z-index: 2;
+    }
+
+    .eval-root .foda-center::before,
+    .eval-root .foda-center::after {
+        content: "";
+        position: absolute;
+        background: #fff;
+    }
+
+    .eval-root .foda-center::before { left: 0; right: 0; top: calc(50% - 3px); height: 6px; }
+    .eval-root .foda-center::after  { top: 0; bottom: 0; left: calc(50% - 3px); width: 6px; }
+
+    .eval-root .foda-center-inner {
+        position: relative;
+        z-index: 1;
+        width: 68%;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: .5rem;
+    }
+
+    .eval-root .foda-center-inner span {
+        font-size: .78rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #d19b6a;
+        max-width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .eval-root .foda-center-inner strong {
+        font-size: clamp(2rem, 4.5vw, 3.2rem);
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: .04em;
+        color: #d19b6a;
+        text-shadow: 3px 3px 0 rgba(0, 0, 0, .1);
+    }
+
+    /* Recomendación a todo el ancho */
+    .eval-root .eval-fodalayout .eval-recocard {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Móvil: cuadrantes apilados, anillo arriba */
+    @media (max-width: 767.98px) {
+        .eval-root .eval-fodagrid { grid-template-columns: 1fr; }
+
+        .eval-root .foda-q-f,
+        .eval-root .foda-q-d,
+        .eval-root .foda-q-o,
+        .eval-root .foda-q-a {
+            grid-column: 1;
+            grid-row: auto;
+            text-align: left;
+        }
+
+        .eval-root .foda-q .foda-q-ico { font-size: 2rem; }
+
+        .eval-root .foda-q-d .eval-fodahead,
+        .eval-root .foda-q-a .eval-fodahead { flex-direction: row; }
+
+        .eval-root .foda-q-d .eval-fodahead > div,
+        .eval-root .foda-q-a .eval-fodahead > div { text-align: left; }
+
+        .eval-root .foda-q .eval-chips,
+        .eval-root .foda-q-d .eval-chips,
+        .eval-root .foda-q-a .eval-chips { margin-left: 0; max-width: 100%; }
+
+        .eval-root .foda-center {
+            position: relative;
+            top: auto;
+            left: auto;
+            transform: none;
+            width: 200px;
+            margin: 1rem auto;
+            grid-row: 1;
+        }
     }
 </style>
 {% endblock %}
@@ -472,9 +695,14 @@
 
             <div class="eval-fodagrid">
                 {% for g in foda_groups %}
-                <article class="eval-card eval-fodacard">
+                <article class="eval-card eval-fodacard foda-q foda-q-{{ g.letter|lower }}">
                     <header class="eval-fodahead">
-                        <span class="eval-fodaletter {{ g.css }}">{{ g.letter }}</span>
+                        <i class="bi foda-q-ico
+                            {% if g.letter == 'F' %}bi-link-45deg
+                            {% elif g.letter == 'D' %}bi-dash-circle
+                            {% elif g.letter == 'O' %}bi-lightbulb
+                            {% else %}bi-exclamation-triangle{% endif %}"
+                           aria-hidden="true"></i>
                         <div>
                             <h3>{{ g.title }}</h3>
                             <small>{{ g.count }} factor{{ g.count|pluralize:"es" }}</small>
@@ -490,6 +718,15 @@
                     </div>
                 </article>
                 {% endfor %}
+
+                <!-- Anillo central decorativo -->
+                <div class="foda-center" aria-hidden="true">
+                    <div class="foda-center-inner">
+                        <span>Análisis</span>
+                        <strong>FODA</strong>
+                        <span>{% if evaluacion %}{{ evaluacion.software }}{% else %}de software{% endif %}</span>
+                    </div>
+                </div>
             </div>
 
             <aside class="eval-recocard">
@@ -536,20 +773,20 @@
 
             <button type="button" data-go="ponderacion" class="btn-cancelar">← Atrás</button>
 
-            {% if informe_url %}
+            <!--{% if informe_url %}
             <a href="{{ informe_url }}" class="btn-cancelar">Descargar informe</a>
-            {% endif %}
+            {% endif %}-->
 
             <!-- Reiniciar se ofrece únicamente en el paso 4. -->
             <!-- El atributo form envía el formulario de reinicio, no el de recomendación. -->
-            <button
+            <!-- <button
                 type="submit"
                 form="eval-reset-form"
                 class="btn-cancelar"
             >
                 <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                 Reiniciar evaluación
-            </button>
+            </button>-->
 
             {% if evaluacion and evaluacion.recomendacion %}
 

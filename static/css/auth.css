@@ -52,7 +52,7 @@
     border-radius: 12px;
     padding: .65rem 1.1rem;
     min-width: 92px;
-    box-shadow: 0 4px 14px rgba(90, 31, 138, .06);
+    box-shadow: 0 4px 14px rgba(49, 46, 129, .06);
 }
 
 .stat strong {
@@ -98,7 +98,7 @@
 .auth-tab.active {
     background: var(--g-card);
     color: var(--g-ink);
-    box-shadow: 0 2px 6px rgba(60, 20, 100, .12);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
 }
 
 .card-title {
@@ -135,13 +135,13 @@
 }
 
 .field .form-control::placeholder {
-    color: #8d84a3;
+    color: #94a3b8;
 }
 
 .field .form-control:focus {
     background: var(--g-card);
     border-color: var(--g-purple);
-    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+    box-shadow: 0 0 0 .2rem rgba(67, 56, 202, .18);
 }
 
 .field-error {

@@ -5,7 +5,7 @@
 
 {# CSS propio del historial (evaluacion/static/evaluacion/historial.css) #}
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'evaluacion/historial.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'evaluacion/historial.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -105,9 +105,17 @@
                 <!-- Software y organización -->
                 <div class="hist-main">
                     <h3>{{ e.software }}</h3>
-                    <small>{{ e.organizacion.nombre }} · {{ e.get_tipo_display }}</small>
-                </div>
 
+                    <small style="display: block;">
+                        {{ e.organizacion.nombre }}
+                    </small>
+                    <small style="display: block;">
+                        {{ e.get_tipo_display }} Evaluación
+                    </small>
+                    <small style="display: block; margin-top: 4px;">
+                        {{ e.categoria.nombre }}
+                    </small>
+                </div>
                 <!-- Resultado y ponderación media -->
                 <div class="hist-result">
                     <span class="res-badge {{ e.clase_etiqueta }}">{{ e.etiqueta }}</span>

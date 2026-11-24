@@ -13,8 +13,8 @@ ESCALA_1_4 = [MinValueValidator(1), MaxValueValidator(4)]
 class Organizacion(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="organizaciones")
     nombre = models.CharField(max_length=100)
-    tipo = models.CharField(max_length=50, blank=True)
-    descripcion = models.TextField(blank=True)
+    #tipo = models.CharField(max_length=50, blank=True)
+    #descripcion = models.TextField(blank=True)
 
     class Meta:
         verbose_name = "Organización"

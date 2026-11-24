@@ -1,4 +1,5 @@
 {# Modal HU-02: registrar organización. Incluir FUERA del <form> de la evaluación (los formularios no se anidan). #}
+
 <div class="modal fade org-modal" id="modalOrganizacion" tabindex="-1"
      aria-labelledby="modalOrganizacionTitulo" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -16,21 +17,9 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-field">
-                        <label for="org_nombre">Nombre</label>
-                        {{ org_form.nombre }}
-                    </div>
-
-                    <div class="form-field">
-                        <label for="org_tipo">Tipo</label>
-                        {{ org_form.tipo }}
-                    </div>
-
                     <div class="form-field mb-0">
-                        <label for="org_descripcion">
-                            Descripción <span class="optional-label">(opcional)</span>
-                        </label>
-                        {{ org_form.descripcion }}
+                        <label for="org_nombre">Nombre de la organización</label>
+                        {{ org_form.nombre }}
                     </div>
                 </div>
 
