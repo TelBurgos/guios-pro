@@ -30,6 +30,20 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# Orígenes de confianza para CSRF (necesario en producción con HTTPS)
+# (ejemplo: DJANGO_CSRF_TRUSTED_ORIGINS=https://miapp.onrender.com)
+CSRF_TRUSTED_ORIGINS = [
+    origen.strip()
+    for origen in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origen.strip()
+]
+
+# Render termina el HTTPS en su proxy; Django debe saberlo
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
 
 # BASE DE DATOS (Neon, PostgreSQL en la nube)
 # DB_DIRECTA=1 usa la conexión directa (para migrate y loaddata)
@@ -74,6 +88,7 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # justo después de SecurityMiddleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -112,11 +127,22 @@ TEMPLATES = [
 
 # ARCHIVOS ESTÁTICOS
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Solo se registra la carpeta si existe (Git no sube carpetas vacías)
 STATICFILES_DIRS = [
     ruta for ruta in [BASE_DIR / "static"] if ruta.exists()
 ]
+
+# WhiteNoise sirve los estáticos en producción
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 # CONFIGURACIÓN DE DJANGO
