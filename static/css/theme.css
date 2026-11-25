@@ -1,42 +1,44 @@
 /* ==========================================================
  * theme.css — base compartida de GUIOS PRO
+ * Paleta LUNA, versión vívida: cian #2CC3DC · azul #1A8AB8 · océano #0B5D93 · marino #062F5E
  * Fondo, tokens, tipografía, marca y botón principal.
  * Cargar SIEMPRE antes de auth.css y dashboard.css.
  * ========================================================== */
 
 :root {
-    --g-ink: #0f172a;
-    --g-text: #475569;
-    --g-purple: #4338ca;
-    --g-purple-dark: #312e81;
-    --g-lilac: #e0e7ff;
-    --g-bg: #f1f5f9;
+    --g-ink: #04213f;
+    --g-text: #1d6891;          /* texto secundario: más contraste que antes */
+    --g-purple: #1a8ab8;        /* acento principal (nombre heredado) */
+    --g-purple-dark: #0b5d93;
+    --g-lilac: #d3f1f8;
+    --g-bg: #e3f6fb;
     --g-card: #ffffff;
-    --g-line: #e2e8f0;
-    --g-shadow: 0 24px 60px rgba(15, 23, 42, .18);
+    --g-line: #bfe3ee;
+    --g-shadow: 0 24px 60px rgba(11, 93, 147, .20);
 }
 
 [data-theme="dark"] {
-    --g-purple: #818cf8;
-    --g-purple-dark: #6366f1;
-    --g-ink: #e2e8f0;
-    --g-text: #94a3b8;
-    --g-lilac: #1e2547;
-    --g-bg: #0b1120;
-    --g-card: #111a2e;
-    --g-line: #1e293b;
-    --g-shadow: 0 24px 60px rgba(0, 0, 0, .45);
+    color-scheme: dark;          /* selects, scrollbars y campos nativos en oscuro */
+    --g-purple: #38bdd8;
+    --g-purple-dark: #8fdcea;
+    --g-ink: #f1f5f9;            /* texto principal */
+    --g-text: #b6c2d1;           /* texto secundario */
+    --g-lilac: #1d2a40;          /* campos y fondos suaves */
+    --g-bg: #0d1424;
+    --g-card: #151f33;
+    --g-line: #2a3750;
+    --g-shadow: 0 18px 44px rgba(0, 0, 0, .45);
 }
 
-/* ---------- Fondo (sin HTML extra: dos manchas con pseudo-elementos) ---------- */
+/* ---------- Fondo: degradado vivo + dos manchas de color ---------- */
 body.theme-pro {
     margin: 0;
     min-height: 100vh;
     font-family: "Plus Jakarta Sans", system-ui, sans-serif;
     color: var(--g-ink);
     background:
-        radial-gradient(420px 300px at 68% 0, rgba(199, 210, 254, .65), transparent 70%),
-        linear-gradient(135deg, var(--g-bg) 0%, var(--g-bg) 100%);
+        radial-gradient(520px 340px at 68% 0, rgba(127, 227, 240, .85), transparent 70%),
+        linear-gradient(135deg, #e9f9fd 0%, #cdeef7 100%);
 }
 
 body.theme-pro::before,
@@ -54,8 +56,8 @@ body.theme-pro::before {
     height: 540px;
     top: -170px;
     left: -150px;
-    background: #a5b4fc;
-    opacity: .75;
+    background: #6fe0f0;
+    opacity: .9;
 }
 
 body.theme-pro::after {
@@ -63,13 +65,28 @@ body.theme-pro::after {
     height: 580px;
     bottom: -250px;
     right: -170px;
-    background: #818cf8;
-    opacity: .8;
+    background: #1fa3d4;
+    opacity: .85;
 }
 
+[data-theme="dark"] body.theme-pro {
+    background:
+        radial-gradient(640px 360px at 70% 0, rgba(44, 195, 220, .07), transparent 70%),
+        linear-gradient(180deg, #0d1424 0%, #0a101d 100%);
+}
+
+/* Manchas casi imperceptibles: el fondo queda limpio */
 [data-theme="dark"] body.theme-pro::before,
 [data-theme="dark"] body.theme-pro::after {
-    opacity: .3;
+    opacity: .07;
+}
+
+[data-theme="dark"] body.theme-pro::before {
+    background: #2cc3dc;
+}
+
+[data-theme="dark"] body.theme-pro::after {
+    background: #1a8ab8;
 }
 
 /* ---------- Marca ---------- */
@@ -87,8 +104,8 @@ body.theme-pro::after {
     place-items: center;
     color: #fff;
     font-weight: 800;
-    background: linear-gradient(135deg, #6366f1, #312e81);
-    box-shadow: 0 6px 14px rgba(49, 46, 129, .35);
+    background: linear-gradient(135deg, #2cc3dc, #0b5d93);
+    box-shadow: 0 6px 14px rgba(11, 93, 147, .4);
 }
 
 .brand-name {
@@ -111,20 +128,20 @@ body.theme-pro::after {
     color: #fff;
     font-weight: 700;
     font-size: .9rem;
-    background: linear-gradient(180deg, #6366f1, #4338ca);
-    box-shadow: 0 8px 18px rgba(67, 56, 202, .35);
+    background: linear-gradient(180deg, #1a94c2, #0b5d93);
+    box-shadow: 0 8px 18px rgba(11, 93, 147, .4);
     cursor: pointer;
     transition: transform .15s, box-shadow .15s;
 }
 
 .btn-grad:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 22px rgba(67, 56, 202, .4);
+    box-shadow: 0 12px 22px rgba(11, 93, 147, .45);
     color: #fff;
 }
 
 .btn-grad:focus-visible {
-    outline: 3px solid rgba(67, 56, 202, .4);
+    outline: 3px solid rgba(44, 195, 220, .55);
     outline-offset: 2px;
 }
 

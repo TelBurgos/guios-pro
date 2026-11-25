@@ -170,3 +170,7 @@ ACCOUNT_SIGNUP_FORM_CLASS = (
 
 # CORREO LOCAL (SIN BREVO)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+SESSION_COOKIE_AGE = 30 * 60          # 30 minutos de inactividad
+SESSION_SAVE_EVERY_REQUEST = True     # renueva el plazo con cada petición

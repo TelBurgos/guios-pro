@@ -57,15 +57,16 @@ def construir_libro(act):
         fila[3].alignment = Alignment(wrap_text=True, vertical="top")
 
     # Hoja 3: información de la actualización
-    # Hoja 3: información de la actualización
     wi = wb.create_sheet("Actualización")
     _encabezado(wi, ["Dato", "Valor"], [28, 50])
     wi.append(["ID de actualización", act.id])
-    wi.append(["Fecha", timezone.localtime(act.fecha).strftime("%Y-%m-%d %H:%M")])  # <- cambiado
+    wi.append(["Fecha", timezone.localtime(act.fecha).strftime("%Y-%m-%d %H:%M")])
     wi.append(["Fuente", act.fuente])
     wi.append(["Versión de cálculo", act.version_calculo])
     wi.append(["Total de consultas", consultas.count()])
     wi.append(["Total de factores", detalles.count()])
+    for clave, valor in (act.cuartiles or {}).items():
+        wi.append([f"Cuartil {clave}", float(valor)])
     return wb
 
 def obtener_actualizacion(act_id=None):

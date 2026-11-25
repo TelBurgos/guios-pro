@@ -16,6 +16,8 @@ class ActualizacionIS(models.Model):
     fecha = models.DateTimeField(auto_now_add=True)
     fuente = models.CharField(max_length=150, blank=True)
     version_calculo = models.CharField(max_length=50, blank=True)
+    # rq1..rq4 de la Ec. 5.2: lo que realmente decide la IL (RNF-07, auditoría)
+    cuartiles = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = "actualizacionis"

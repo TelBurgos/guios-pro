@@ -1,6 +1,5 @@
 from django import forms
 
-from .models import Evaluacion, Organizacion
 from .models import Categoria, Evaluacion, Organizacion
 
 

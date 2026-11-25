@@ -18,25 +18,37 @@ PAUSA = 5          # segundos entre llamadas (15 por minuto = 1 cada 4 s)
 REINTENTOS = 4
 ESPERA_REINTENTO = 40  # segundos ante 429 (límite) o 503 (alta demanda)
 
+MIN_PALABRAS, MAX_PALABRAS = 2, 2   # largo permitido de cada término
+
 PROMPT = (
-    "Para cada criterio de adopción de software libre de la lista, devuelve 3 a 4 "
+    "Para cada criterio de adopción de software libre de la lista, devuelve 5 "
     "términos de búsqueda académica en inglés, separados por coma, sin comillas. "
-    "Cada término debe tener de 1 a 3 palabras, ser específico del criterio y NO "
-    "contener las palabras 'open source', 'free software' ni 'software' solas "
-    "(ya se agregan aparte). Ejemplos: 'documentation quality', 'user manuals', "
-    "'vendor lock-in'. "
+    "Reglas:\n"
+    "- Cada término tiene EXACTAMENTE 2 palabras, y son palabras clave que "
+    "aparecen de verdad en títulos y resúmenes de artículos científicos "
+    "(por ejemplo 'vendor lock-in', 'user training', 'code quality').\n"
+    "- No inventes combinaciones ni parafrasees el criterio. Si dudas de que "
+    "un término exista en la literatura, usa uno más común.\n"
+    "- Incluye términos amplios del tema (por ejemplo 'technical support') y "
+    "sinónimos habituales.\n"
+    "- No uses nombres de productos o marcas, ni palabras sueltas.\n"
+    "- NO incluyas 'open source', 'free software', 'FLOSS' ni 'software' solos "
+    "(ya se agregan aparte).\n"
     "Responde SOLO un objeto JSON cuya clave sea el id y cuyo valor sea el texto "
-    "con los términos. Ejemplo: {{\"12\": \"software certification, standards "
-    "compliance\"}}.\n\nCriterios:\n{lista}"
+    "con los términos. Ejemplo: {{\"12\": \"standards compliance, software "
+    "certification, quality assurance, regulatory compliance, compliance testing\"}}."
+    "\n\nCriterios:\n{lista}"
 )
 
 def _limpiar(texto):
+    """Normaliza los términos y descarta los de una sola palabra o de más de 3."""
     texto = (texto or "").replace("\n", ",")
     terminos = [
         " ".join(t.replace('"', " ").replace("|", " ").replace("*", " ").split())
         for t in texto.split(",")
     ]
-    return ", ".join(t for t in terminos if t)[:300]
+    terminos = [t for t in terminos if MIN_PALABRAS <= len(t.split()) <= MAX_PALABRAS]
+    return ", ".join(terminos)[:300]
 
 
 def _es_temporal(error):

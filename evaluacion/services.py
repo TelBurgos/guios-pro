@@ -2,7 +2,8 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from .logic import LEVELS, codigo_recomendacion, derive, init_state, recomendacion
+from .logic import (FODA_NEGATIVO, LEVELS, codigo_recomendacion, derive,
+                    init_state, recomendacion)
 from .models import Evaluacion, EvaluacionFactor, EvaluacionSubfactor, Factor
 
 
@@ -99,7 +100,7 @@ def crear_segunda_evaluacion(padre):
         evaluacion_padre=padre, actualizacion=padre.actualizacion, paso_actual=3,
     )
     vfs = list(padre.valoraciones_factor.all())
-    a_reevaluar = {v.factor_id for v in vfs if v.foda in ("Debilidad", "Amenaza")}
+    a_reevaluar = {v.factor_id for v in vfs if v.foda in FODA_NEGATIVO}
 
     EvaluacionFactor.objects.bulk_create([
         EvaluacionFactor(

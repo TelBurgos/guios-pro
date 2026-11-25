@@ -8,6 +8,7 @@ import requests
 from django.db import transaction
 from dotenv import load_dotenv
 
+from evaluacion.logic import MATRIZ_IMPORTANCIA
 from evaluacion.models import Factor
 from .ia import completar_terminos
 from .models import ActualizacionIS, ConsultaIS, DetalleActualizacionIS
@@ -28,14 +29,6 @@ TIMEOUT = 20          # segundos por petición
 # Las búsquedas con más de 5 operadores booleanos admiten solo 2 por segundo
 PAUSA = 0.6
 MAX_ESPERA = 60       # tope de espera ante un 429/5xx temporal
-
-# clave = (IL, IE) -> IS   (Rea Sánchez, 2022). Verificar la cita exacta en la tesis.
-MATRIZ_IS = {
-    (1, 1): 1, (2, 1): 1, (3, 1): 2, (4, 1): 2,
-    (1, 2): 1, (2, 2): 2, (3, 2): 2, (4, 2): 3,
-    (1, 3): 2, (2, 3): 2, (3, 3): 3, (4, 3): 3,
-    (1, 4): 2, (2, 4): 3, (3, 4): 3, (4, 4): 4,
-}
 
 BLOQUE_FLOSS = '(FLOSS OR FOSS OR "free software" OR "open source")'
 BLOQUE_ADOPCION = "(adoption OR adopt OR migration OR deployment)"
@@ -186,7 +179,7 @@ def consultar_literatura(factores):
 
 
 def calcular_resultados(factores, datos):
-    """Calcula rᵢ, IL e IS por factor. Función sin acceso a BD ni red."""
+    """Calcula rᵢ, IL e IS por factor. Devuelve (resultados, cuartiles). Sin acceso a BD ni red."""
     if sum(c for c, _ in datos.values()) == 0:
         # Con 0 artículos en todo, todos los factores quedarían con IL = 1 y
         # la IS se degradaría sin base real: mejor conservar la última IS.
@@ -205,14 +198,17 @@ def calcular_resultados(factores, datos):
         if ie not in (1, 2, 3, 4):
             raise ValueError(f"El factor '{f.nombre}' no tiene importancia_experta válida (1 a 4)")
         il = calcular_il(rs[f.id], rq)
-        resultados.append((f, datos[f.id][0], rs[f.id], il, ie, MATRIZ_IS[(il, ie)]))
-    return resultados
+        resultados.append((f, datos[f.id][0], rs[f.id], il, ie, MATRIZ_IMPORTANCIA[(il, ie)]))
+    return resultados, rq
 
 
 @transaction.atomic
-def guardar_actualizacion(consultas, resultados):
+def guardar_actualizacion(consultas, resultados, rq):
     """Fase de persistencia: todo o nada, y rápida (sin llamadas externas)."""
-    act = ActualizacionIS.objects.create(fuente=FUENTE, version_calculo=VERSION)
+    act = ActualizacionIS.objects.create(
+        fuente=FUENTE, version_calculo=VERSION,
+        cuartiles={f"rq{i}": str(v) for i, v in enumerate(rq, 1)},
+    )
 
     ConsultaIS.objects.bulk_create([
         ConsultaIS(
@@ -248,8 +244,8 @@ def actualizar_is():
     completar_terminos()  # si la IA falla, se usan los términos que ya existen
     factores = list(Factor.objects.prefetch_related("subfactores").order_by("id"))
     consultas, datos = consultar_literatura(factores)
-    resultados = calcular_resultados(factores, datos)
-    return guardar_actualizacion(consultas, resultados)
+    resultados, rq = calcular_resultados(factores, datos)
+    return guardar_actualizacion(consultas, resultados, rq)
 
 
 def actualizar_is_seguro():

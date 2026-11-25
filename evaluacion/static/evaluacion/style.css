@@ -3,10 +3,10 @@
     padding: 1.8rem;
     border-radius: 22px;
     color: #fff;
-    background: linear-gradient(160deg, #8a2fb8 0%,
-#4b1f86 50%,
-#2a1b66 100%);
-    box-shadow: 0 24px 50px rgba(74, 28, 128, .35);
+    background: linear-gradient(160deg, #1a94c2 0%,
+#0b5d93 50%,
+#062f5e 100%);
+    box-shadow: 0 24px 50px rgba(11, 93, 147, .35);
 }
 
 .nueva-aside h1 {
@@ -131,7 +131,7 @@
 
 .form-field input::placeholder,
 .form-field textarea::placeholder {
-    color: #8d84a3;
+    color: #7aa3b5;
 }
 
 .form-field input:focus,
@@ -140,7 +140,7 @@
     outline: 0;
     border-color: var(--g-purple);
     background-color: var(--g-card);
-    box-shadow: 0 0 0 .2rem rgba(123, 47, 181, .18);
+    box-shadow: 0 0 0 .2rem rgba(26, 148, 194, .18);
 }
 
 .form-field textarea {
@@ -194,9 +194,9 @@
 .btn-continuar {
     border: 0;
     color: #fff;
-    background: linear-gradient(180deg, #9b4fd6,
-#6d2aa6);
-    box-shadow: 0 8px 18px rgba(109, 42, 166, .35);
+    background: linear-gradient(180deg, #1a94c2,
+#0b5d93);
+    box-shadow: 0 8px 18px rgba(11, 93, 147, .35);
 }
 
 .btn-continuar:hover {
@@ -212,4 +212,22 @@
     .panel-hero {
         padding: 1.5rem;
     }
+}
+
+/* ==========================================================
+ * MODO OSCURO — chips y estados legibles (texto claro sobre fondo translúcido)
+ * ========================================================== */
+[data-theme="dark"] .form-error {
+    color: #ffb0b0;
+}
+
+[data-theme="dark"] .form-field input::placeholder,
+[data-theme="dark"] .form-field textarea::placeholder {
+    color: #9fb0c4;
+}
+
+[data-theme="dark"] .form-field input:focus,
+[data-theme="dark"] .form-field select:focus,
+[data-theme="dark"] .form-field textarea:focus {
+    background-color: #151f33;
 }

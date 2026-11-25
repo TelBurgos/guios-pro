@@ -14,6 +14,26 @@ SUB_LEVELS = [
     "Cumple el requisito",
 ]
 
+# Figura 5.10 (Rea Sánchez, 2022, p. 89). Fuente única de la matriz de importancia:
+#   IL x IE -> IS   (importancia_sugerida/services.py)
+#   IS x ID -> IR   (relative(), abajo)
+# La plantilla la recibe con matriz_para_js(); no se repite en JavaScript.
+MATRIZ_IMPORTANCIA = {
+    (1, 1): 1, (2, 1): 1, (3, 1): 2, (4, 1): 2,
+    (1, 2): 1, (2, 2): 2, (3, 2): 2, (4, 2): 3,
+    (1, 3): 2, (2, 3): 2, (3, 3): 3, (4, 3): 3,
+    (1, 4): 2, (2, 4): 3, (3, 4): 3, (4, 4): 4,
+}
+
+# Factores cuyo FODA es negativo: base de la recomendación y de la 2.ª evaluación
+FODA_NEGATIVO = ("Debilidad", "Amenaza")
+
+
+def matriz_para_js():
+    """{"1-1": 1, ...} listo para json_script en la plantilla."""
+    return {f"{a}-{b}": v for (a, b), v in MATRIZ_IMPORTANCIA.items()}
+
+
 # Fuente única de los títulos de recomendación (modelo, vistas y plantillas)
 RECO_TITULOS = {
     "A": "Adopción recomendada",
@@ -35,8 +55,8 @@ def init_state(catalog):
 
 
 def relative(suggested, decisor):
-    # Código original: índices base cero y división entera.
-    return (suggested - 1 + decisor - 1) // 2
+    """Importancia relativa como índice base cero (0 = Irrelevante ... 3 = Fundamental)."""
+    return MATRIZ_IMPORTANCIA[(suggested, decisor)] - 1
 
 
 def derive(catalog, state):
@@ -72,19 +92,21 @@ def derive(catalog, state):
     return rows
 
 
-# Textos originales de GUIOS (no modificar: RNF-01)
+# Textos originales de GUIOS (RNF-01). Solo se corrigieron erratas de ortografía.
 RECO_C = "Recomendación C: La organización debe de proporcionar los recursos necesarios que garanticen una adopción satisfactoria. Si se trata de factores internos deben de ser aspectos a mejorar dentro de la organización y si son factores externos, dedicar recursos de ingeniería para mejorar el software."
 RECO_B = "Recomendación B: Es posible adoptar. A pesar que se han detectado amenazas y/o debilidades en factores cuya importancia relativa es opcional, por lo tanto, se sugiere revisar los criterios que no cumplen con lo mínimo requerido para adoptar."
-RECO_A = "Recomendación A: Adoptar. Todos los factores han sido identifcados como Oportunidades y/o Fortalezas. Esto quiere decir que la organización cumple satisfactoriamente con la mayoria de requisitos para adoptar la solución FLOSS."
+RECO_A = "Recomendación A: Adoptar. Todos los factores han sido identificados como Oportunidades y/o Fortalezas. Esto quiere decir que la organización cumple satisfactoriamente con la mayoría de requisitos para adoptar la solución FLOSS."
 
 
 def recomendacion(rows):
     evaluated = [r for r in rows if r["foda"]]
     if not evaluated:
         return ""  # Evita el IndexError original cuando no hay factores evaluados.
-    a = any(r["foda"] in ("Amenaza", "Debilidad") and r["relative"] in ("Importante", "Fundamental") for r in evaluated)
-    b = any(r["foda"] in ("Amenaza", "Debilidad") and r["relative"] == "Opcional" for r in evaluated)
-    return RECO_C if a else RECO_B if b else RECO_A
+    negativos = [r for r in evaluated if r["foda"] in FODA_NEGATIVO]
+    hay_critico = any(r["relative"] in ("Importante", "Fundamental") for r in negativos)
+    hay_opcional = any(r["relative"] == "Opcional" for r in negativos)
+    return RECO_C if hay_critico else RECO_B if hay_opcional else RECO_A
+
 
 ESCALA = 4
 
@@ -110,7 +132,7 @@ def detalle_recomendacion(texto):
 def factores_a_reevaluar(rows):
     """HU-09. SUPUESTO: la segunda evaluación repite solo los factores con Debilidad o Amenaza.
     Verificar con la tesis (Rea Sánchez, 2022, pp. 104-105) y con original/guiosad.py."""
-    return [r for r in rows if r["foda"] in ("Debilidad", "Amenaza")]
+    return [r for r in rows if r["foda"] in FODA_NEGATIVO]
 
 
 def _tono(pct):
@@ -149,7 +171,7 @@ def resumen_resultados(rows):
 
     reco_text = recomendacion(rows) if con_score else ""
     codigo, titulo, cuerpo = detalle_recomendacion(reco_text)
-    riesgos = [r["name"] for r in con_score if r["foda"] in ("Debilidad", "Amenaza")]
+    riesgos = [r["name"] for r in factores_a_reevaluar(con_score)]
 
     return {
         "pond_rows": pond_rows, "pond_media": pond_media, "pond_pct": pond_pct,
